@@ -2,9 +2,12 @@
 
 Tarih: 24 Eylül 2026. Kapsam: MIT lisanslı, yerelde çalışan portföy/POC.
 
-**Durum:** Yerel kaynak ve API hazırlığı tamamlandı. GitHub üzerindeki CI koşusu
-ve özel güvenlik bildirimi ayarı henüz doğrulanmadı. Outlook istemcisindeki son
-deneme kullanıcı isteğiyle ertelendi. Depo görünürlüğü değiştirilmedi, push yapılmadı.
+**Durum:** Yerel kaynak ve API hazırlığı tamamlandı. Depo 24 Eylül 2026 tarihinde
+public hale gelmiş ve iki yayın hazırlığı commit'i uzak `main` dalına gönderilmiş.
+Bu görünürlük/push değişiklikleri bu doğrulama akışının dışında gerçekleşti.
+Uzak `main` commit'i `1e05484` için GitHub **Public release checks** koşuları
+başarılı tamamlandı. Özel güvenlik bildirimi ayarı henüz doğrulanmadı. Outlook
+istemcisindeki son deneme kullanıcı isteğiyle ertelendi.
 
 ## Uygulanan değişiklikler
 
@@ -34,6 +37,7 @@ deneme kullanıcı isteğiyle ertelendi. Depo görünürlüğü değiştirilmedi
 | Frontend testleri | 13/13 geçti |
 | Frontend production build | Başarılı |
 | İki Outlook manifesti | Doğrulandı; bu sonuç istemci çalışma testi değildir |
+| GitHub Actions / uzak main | `1e05484` için Public release checks başarılı |
 | npm audit | 0 güvenlik bulgusu |
 | NuGet audit | Güncelleme sonrası yüksek/kritik bulgu yok; kontrol betiği geçti |
 | Gitleaks: tüm yerel Git referansları | Tarandı, gizli anahtar bulunmadı |
@@ -58,6 +62,13 @@ güncel dokümanlarda genel örneklerle değiştirildi. İlk commit'in iki rehbe
 eski yerel kullanıcı yolu kalıyor; bu bir erişim anahtarı değildir ve geçmiş
 yeniden yazılmadı. Yazar kimliği/telif bilgisi bilinçli olarak korunuyor.
 
+Üç mevcut commit'in Git yazar/committer metadata'sında kurumsal e-posta adresi
+bulunuyor ve public geçmişte görülebilir. Yeni commitler için bu depoya özel
+GitHub `noreply` adresi yapılandırıldı. Eski metadata'yı kaldırmak geçmişi yeniden
+yazıp public `main` dalına force-push gerektirir; bu işlem yapılmadı. Adres daha
+önce public olduğu için geçmişi değiştirmek üçüncü taraf kopyalarından silinmesini
+garanti etmez.
+
 Ignore edilen dosyaları da kapsayan ek tarama; yerel geliştirme sertifikasını,
 Visual Studio/IIS yerel yapılandırmasındaki olası anahtarları ve indirilen
 Gitleaks dokümantasyonundaki örnekleri işaretledi. Bu dosyalar yayın kaynaklarına
@@ -73,14 +84,14 @@ ekranıdır; Outlook ekranı veya üretilmiş bir arayüz değildir.
 
 ## GitHub ve yayın için kalan adımlar
 
-1. GitHub CLI oturumu bu ortamda HTTP 401 döndürdü. Depo sahibi oturumunu açmalı.
-2. Yayın adayı commit'i private depoya gönderilip **Public release checks** koşusu
-   başarılı tamamlanmalı. GitHub'daki gerçek CI sonucu henüz mevcut değildir.
-3. Depoda **Settings → Code security → Private vulnerability reporting** etkinleştirilmeli;
+1. GitHub CLI oturumu bu ortamda HTTP 401 döndürdü. Ayar değişiklikleri için depo
+   sahibi oturumunu yeniden açmalı.
+2. Depoda **Settings → Code security → Private vulnerability reporting** etkinleştirilmeli;
    SECURITY.md içindeki özel bildirim bağlantısının çalıştığı doğrulanmalı.
-4. Outlook'ta sentetik test hesabıyla son istemci denemesi, kullanıcı talebiyle
+3. Outlook'ta sentetik test hesabıyla son istemci denemesi, kullanıcı talebiyle
    sonraya bırakıldı. Destek matrisi bu doğrulama yapılmadan genişletilmemeli.
-5. Bu sonuçlar incelendikten sonra public görünürlük ayrı, açıkça onaylanan son
-   işlem olarak uygulanmalı. Bu hazırlık public görünürlüğe geçiş yapmaz.
+4. Kurumsal commit e-postasının public geçmişten kaldırılması istenirse, etkilenen
+   commitler GitHub `noreply` adresiyle yeniden yazılmalı ve sonuç incelendikten
+   sonra ayrıca onaylanan force-push yapılmalı.
 
 Son kaynak değişikliklerinden sonra aynı tarama ve testler tekrar çalıştırılmalıdır.

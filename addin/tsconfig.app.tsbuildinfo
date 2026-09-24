@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/api/mailanalysisapi.test.ts","./src/api/mailanalysisapi.ts","./src/components/analysisresult.test.tsx","./src/components/analysisresult.tsx","./src/office/outlookitemreader.test.ts","./src/office/outlookitemreader.ts","./src/test/setup.ts"],"version":"5.9.3"}

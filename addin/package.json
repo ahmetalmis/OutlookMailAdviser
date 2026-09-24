@@ -25,7 +25,7 @@
     "fs-extra": "^11.4.1",
     "jsdom": "^26.1.0",
     "office-addin-manifest": "^3.0.0",
-    "typescript": "^5.9.2",
+    "typescript": "^7.0.2",
     "vite": "^7.1.5",
     "vitest": "^4.1.11"
   },

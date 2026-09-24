@@ -37,7 +37,8 @@ public static class MailDraftingEndpoints
             result.Tone.ToString().ToLowerInvariant(),
             result.Model,
             result.DurationMilliseconds,
-            result.WasTruncated));
+            result.WasTruncated,
+            result.ContentProcessing));
     }
 
     private static DraftMailCommand MapCommand(DraftMailRequest request)

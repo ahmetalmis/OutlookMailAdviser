@@ -1,4 +1,5 @@
 import type { AnalyzeMailResponse } from "../types";
+import { ContentProcessingNotice } from "./ContentProcessingNotice";
 
 interface Props {
   result: AnalyzeMailResponse;
@@ -17,6 +18,9 @@ function label(value: string): string {
 }
 
 export function AnalysisResult({ result }: Props) {
+  const warnings = result.warnings.filter(warning => !result.contentProcessing ||
+    !["İçeriğin bir bölümü analize dahil edilemedi.",
+      "Mail content exceeded the local processing limit and was truncated."].includes(warning));
   return (
     <section className="result" aria-live="polite">
       <div className="result-heading">
@@ -62,16 +66,16 @@ export function AnalysisResult({ result }: Props) {
         </div>
       )}
 
-      {result.warnings.length > 0 && (
+      {warnings.length > 0 && (
         <div className="warning">
           <strong>Uyarılar</strong>
-          <ul>{result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
+          <ul>{warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
         </div>
       )}
 
+      <ContentProcessingNotice processing={result.contentProcessing} wasTruncated={result.wasTruncated} />
       <p className="metadata">
         {result.model} · {(result.durationMilliseconds / 1000).toFixed(1)} sn
-        {result.wasTruncated ? " · İçerik kısaltıldı" : ""}
       </p>
     </section>
   );

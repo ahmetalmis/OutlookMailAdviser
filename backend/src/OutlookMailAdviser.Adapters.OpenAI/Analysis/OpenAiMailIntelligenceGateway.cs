@@ -106,10 +106,10 @@ public sealed class OpenAiMailIntelligenceGateway(
         {
             throw new ModelTimeoutException(exception);
         }
-        catch (HttpRequestException exception)
+        catch (HttpRequestException)
         {
             throw new ModelProviderException(
-                $"OpenAI is unreachable: {exception.Message}",
+                "OpenAI is unreachable. Check the connection and provider configuration.",
                 "openai_unavailable");
         }
         catch (JsonException exception)
@@ -181,10 +181,10 @@ public sealed class OpenAiMailIntelligenceGateway(
         {
             throw new ModelTimeoutException(exception);
         }
-        catch (HttpRequestException exception)
+        catch (HttpRequestException)
         {
             throw new ModelProviderException(
-                $"OpenAI is unreachable: {exception.Message}",
+                "OpenAI is unreachable. Check the connection and provider configuration.",
                 "openai_unavailable");
         }
         catch (JsonException exception)

@@ -21,7 +21,7 @@ Neither file contains an OpenAI API key. Postman calls the Outlook Mail Adviser 
 Configure Ollama or OpenAI as described in [`../PROVIDER-CONFIGURATION.md`](../PROVIDER-CONFIGURATION.md), then start the API:
 
 ```powershell
-cd C:\Users\aalmis\Documents\ChatGPT\Outlook_Mail_Adviser
+cd C:\src\OutlookMailAdviser
 
 dotnet run `
     --project backend/src/OutlookMailAdviser.Api `
@@ -60,3 +60,16 @@ Restart Postman after trusting the certificate. If Postman still rejects localho
 - `POST /api/v1/mail/draft`: HTTP `200`, JSON draft contract containing `subject`, `body`, `tone`, and `model`.
 
 If readiness fails, fix the selected provider before running analysis. For OpenAI, check `OPENAI_API_KEY`, account quota, model access, and `Ai__Provider`. For Ollama, check that Ollama is running and the configured model is installed.
+# Context processing
+
+Analysis and draft responses include `contentProcessing`:
+`originalCharacters`, `includedCharacters`, `includedHistoryMessages`,
+`historyLimited`, `currentMessageTruncated`, `parsingUncertain`.
+Default maximums are 16,000 total characters, two previous messages and
+4,000 history characters. Signature/duplicate cleanup alone does not set
+`wasTruncated`; omitted message content due to limits does.
+
+For a manual chain test, append three blocks to the HTML body, each containing
+`From:`, `Sent:`, `To:`, `Subject:` on separate lines followed by unique
+message text. Expect two included history messages, `historyLimited=true`,
+and `currentMessageTruncated=false` for a short current message.

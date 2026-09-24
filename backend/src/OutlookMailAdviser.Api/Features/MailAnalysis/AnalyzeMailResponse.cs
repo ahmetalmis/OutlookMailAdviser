@@ -11,7 +11,8 @@ public sealed record AnalyzeMailResponse(
     IReadOnlyList<string> Warnings,
     string Model,
     long DurationMilliseconds,
-    bool WasTruncated);
+    bool WasTruncated,
+    OutlookMailAdviser.Application.MailAnalysis.Models.ContentProcessing? ContentProcessing = null);
 
 public sealed record MailActionResponse(
     string Description,

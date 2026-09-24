@@ -29,7 +29,17 @@ export interface MailAction {
   assignedToCurrentUser: boolean;
 }
 
+export interface ContentProcessing {
+  originalCharacters: number;
+  includedCharacters: number;
+  includedHistoryMessages: number;
+  historyLimited: boolean;
+  currentMessageTruncated: boolean;
+  parsingUncertain: boolean;
+}
+
 export interface AnalyzeMailResponse {
+  contentProcessing?: ContentProcessing | null;
   clientRequestId: string;
   summary: string;
   actionRequired: boolean;
@@ -55,6 +65,7 @@ export interface DraftMailRequest {
 }
 
 export interface DraftMailResponse {
+  contentProcessing?: ContentProcessing | null;
   clientRequestId: string;
   subject: string;
   body: string;

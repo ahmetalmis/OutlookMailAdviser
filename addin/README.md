@@ -4,11 +4,11 @@ Bu klasör, açık Outlook e-postasını okuyup mevcut .NET API'ye gönderen Rea
 
 ## İlk kurulum
 
-Node.js 20 veya üzeri gereklidir. PowerShell'de:
+Node.js 22.12 veya üzeri gereklidir. PowerShell'de:
 
 ```powershell
 cd addin
-npm install
+npm ci
 npm run certs
 npm run icons
 ```
@@ -22,7 +22,8 @@ npm run icons
 Terminal 1 — AI sağlayıcısını seçip API'yi başlatın:
 
 ```powershell
-# Ollama için varsayılan ayarlar yeterlidir.
+# Yerel Ollama alternatifi (varsayılan provider OpenAI):
+$env:Ai__Provider = 'Ollama'
 dotnet run --project backend/src/OutlookMailAdviser.Api --launch-profile https
 ```
 
@@ -63,6 +64,11 @@ Taslak, analiz için seçilen çıktı dilinde hazırlanır. Bu POC sürümü Ou
 
 ## Doğrulama
 
+Analiz ve taslak bağlamı güncel mail ve en fazla önceki iki mesajdan oluşur.
+Toplam 16.000, geçmiş için 4.000 karakter sınırı uygulanır. Normal geçmiş
+azaltımı bilgi notu olarak gösterilir. Güncel mail veya ayrıştırılamayan metin
+kırpılırsa sarı uyarı gösterilir. Eski yazışmalar için ayrıca Outlook isteği yapılmaz.
+
 ```powershell
 cd addin
 npm test
@@ -90,7 +96,7 @@ API'yi tek origin üzerinden sunar:
 https://localhost:7047/addin/index.html
 ```
 
-Kalıcı kurulumu repository kökünden yapmak için ana README'deki **Windows'ta
+Kalıcı kurulumu repository kökünden yapmak için [ayrıntılı geliştirme rehberindeki](../docs/DEVELOPMENT.md) **Windows'ta
 sürekli çalıştırma** bölümünü izleyin. Kurulumdan sonra Outlook'a
 `.artifacts/local-host/manifest.xml` dosyasını bir kez yükleyin. Aynı add-in
 kimliği kullanıldığı için Outlook mevcut geliştirme kaydını bu adreslerle

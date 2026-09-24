@@ -30,9 +30,9 @@ internal sealed class OllamaHealthCheck(
         {
             return HealthCheckResult.Unhealthy("Ollama health check timed out.");
         }
-        catch (HttpRequestException exception)
+        catch (HttpRequestException)
         {
-            return HealthCheckResult.Unhealthy("Ollama is not reachable.", exception);
+            return HealthCheckResult.Unhealthy("Ollama is not reachable.");
         }
     }
 

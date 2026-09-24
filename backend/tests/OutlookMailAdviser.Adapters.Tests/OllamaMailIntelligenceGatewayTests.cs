@@ -14,6 +14,17 @@ namespace OutlookMailAdviser.Adapters.Tests;
 public sealed class OllamaMailIntelligenceGatewayTests
 {
     [Fact]
+    public async Task UnavailableProviderReturnsSafeTypedFailure()
+    {
+        using var client = new HttpClient(new StubHttpMessageHandler((_, _) =>
+            throw new HttpRequestException("PRIVATE_SENTINEL network detail")));
+        var gateway = CreateGateway(client);
+        var exception = await Assert.ThrowsAsync<OllamaUnavailableException>(() => gateway.AnalyzeAsync(
+            CreateSanitizedConversation(), new AnalysisOptions("tr"), CancellationToken.None));
+        Assert.DoesNotContain("PRIVATE_SENTINEL", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AnalyzeAsyncMapsStructuredResponseAndSendsSchema()
     {
         var handler = new StubHttpMessageHandler((request, _) =>
@@ -32,6 +43,8 @@ public sealed class OllamaMailIntelligenceGatewayTests
             CancellationToken.None);
 
         Assert.Equal("Tarih teyidi isteniyor.", result.Analysis.Summary);
+        Assert.Contains("HistoryMarker2", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.DoesNotContain("HistoryMarker3", handler.RequestBodies[0], StringComparison.Ordinal);
         Assert.True(result.Analysis.ActionRequired);
         Assert.Single(result.Analysis.Actions);
         Assert.Equal(new DateOnly(2026, 9, 3), result.Analysis.Actions[0].DueDate);
@@ -153,6 +166,9 @@ public sealed class OllamaMailIntelligenceGatewayTests
             CancellationToken.None);
 
         Assert.Equal("Re: Üretim geçişi", result.Draft.Subject);
+        Assert.Contains("CurrentMarker", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.Contains("HistoryMarker2", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.DoesNotContain("HistoryMarker3", handler.RequestBodies[0], StringComparison.Ordinal);
         Assert.Contains("teyit ediyorum", result.Draft.Body, StringComparison.Ordinal);
 
         using var requestDocument = JsonDocument.Parse(Assert.Single(handler.RequestBodies));
@@ -172,15 +188,7 @@ public sealed class OllamaMailIntelligenceGatewayTests
         new(httpClient, new TestOptionsMonitor<OllamaOptions>(new OllamaOptions()));
 
     private static SanitizedConversation CreateSanitizedConversation() =>
-        new(
-            "Üretim geçişi",
-            "Ayşe <ayse@example.com>",
-            ["Ali <ali@example.com>"],
-            [],
-            new DateTimeOffset(2026, 9, 2, 9, 0, 0, TimeSpan.FromHours(3)),
-            "Üretim geçiş tarihini teyit eder misin?",
-            false,
-            []);
+        ContextFixture.Create();
 
     private static HttpResponseMessage CreateOllamaResponse(string analysisJson)
     {

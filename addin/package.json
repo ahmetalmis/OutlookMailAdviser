@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite --host localhost",
     "build": "tsc -b && vite build",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
@@ -27,6 +27,9 @@
     "office-addin-manifest": "^3.0.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "adm-zip": "^0.6.1"
   }
 }

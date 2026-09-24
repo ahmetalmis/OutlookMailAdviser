@@ -42,6 +42,10 @@ public sealed class MailDraftingEndpointTests(ApiFactory factory) : IClassFixtur
         Assert.Contains("teyit ediyorum", document.RootElement.GetProperty("body").GetString());
         Assert.Equal("friendly", document.RootElement.GetProperty("tone").GetString());
         Assert.Equal("test-model", document.RootElement.GetProperty("model").GetString());
+        var processing = document.RootElement.GetProperty("contentProcessing");
+        Assert.True(processing.GetProperty("includedCharacters").GetInt32() <= 16_000);
+        Assert.Equal(0, processing.GetProperty("includedHistoryMessages").GetInt32());
+        Assert.False(processing.GetProperty("currentMessageTruncated").GetBoolean());
         Assert.Equal(DraftTone.Friendly, factory.DraftGateway.ReceivedOptions?.Tone);
         Assert.Equal(
             "Hafif sert ve uyarıcı olsun.",

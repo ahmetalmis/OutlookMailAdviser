@@ -7,7 +7,7 @@ export default defineConfig(async ({ command }) => ({
   base: command === "build" ? "/addin/" : "/",
   plugins: [react()],
   server: {
-    host: "0.0.0.0",
+    host: "localhost",
     port: 3000,
     strictPort: true,
     https: command === "serve"
@@ -18,6 +18,7 @@ export default defineConfig(async ({ command }) => ({
       : undefined,
   },
   preview: {
+    host: "localhost",
     port: 3000,
     strictPort: true,
   },

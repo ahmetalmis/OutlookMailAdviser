@@ -22,8 +22,8 @@ if (-not $outputRoot.StartsWith($repositoryPrefix, [System.StringComparison]::Or
 Write-Host "Building the Outlook add-in..."
 Push-Location $addinRoot
 try {
-    & npm.cmd install
-    if ($LASTEXITCODE -ne 0) { throw "npm install failed with exit code $LASTEXITCODE." }
+    & npm.cmd ci
+    if ($LASTEXITCODE -ne 0) { throw "npm ci failed with exit code $LASTEXITCODE." }
 
     & npm.cmd run build
     if ($LASTEXITCODE -ne 0) { throw "npm run build failed with exit code $LASTEXITCODE." }

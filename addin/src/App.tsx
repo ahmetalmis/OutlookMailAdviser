@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { analyzeMail, draftMail, getApiStatus, MailAnalysisApiError } from "./api/mailAnalysisApi";
 import { AnalysisResult } from "./components/AnalysisResult";
+import { ContentProcessingNotice } from "./components/ContentProcessingNotice";
 import {
   createAnalysisRequest,
   readCurrentMessage,
@@ -249,9 +250,9 @@ export default function App() {
               <span className="draft-subject-label">Konu</span>
               <strong className="draft-subject">{draftResult.subject}</strong>
               <div className="draft-body">{draftResult.body}</div>
+              <ContentProcessingNotice processing={draftResult.contentProcessing} wasTruncated={draftResult.wasTruncated} />
               <p className="metadata">
                 {draftResult.model} · {(draftResult.durationMilliseconds / 1000).toFixed(1)} sn
-                {draftResult.wasTruncated ? " · Kaynak içerik kısaltıldı" : ""}
               </p>
             </div>
           )}

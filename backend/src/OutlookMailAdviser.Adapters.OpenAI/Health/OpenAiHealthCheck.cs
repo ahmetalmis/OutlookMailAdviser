@@ -35,9 +35,9 @@ internal sealed class OpenAiHealthCheck(
         {
             return HealthCheckResult.Unhealthy("OpenAI health check timed out.");
         }
-        catch (HttpRequestException exception)
+        catch (HttpRequestException)
         {
-            return HealthCheckResult.Unhealthy("OpenAI is not reachable.", exception);
+            return HealthCheckResult.Unhealthy("OpenAI is not reachable.");
         }
     }
 

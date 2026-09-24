@@ -6,4 +6,5 @@ public sealed record AnalyzeMailResult(
     DomainMailAnalysis Analysis,
     string Model,
     long DurationMilliseconds,
-    bool WasTruncated);
+    bool WasTruncated,
+    ContentProcessing? ContentProcessing = null);

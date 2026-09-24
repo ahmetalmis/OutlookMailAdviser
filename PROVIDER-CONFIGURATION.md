@@ -13,6 +13,16 @@ Provider selection happens when the API starts. Stop and restart the API after c
 
 ## Configuration variables
 
+Both providers share local mail-context preprocessing. Defaults:
+`MailProcessing__MaxInputCharacters=16000`,
+`MailProcessing__MaxHistoryMessages=2`,
+`MailProcessing__MaxHistoryCharacters=4000`.
+The current message takes priority; history uses the remaining budget.
+Counts include headers/separators and are characters, not exact token counts.
+System prompts and draft instructions are outside this mail budget.
+No extra model call is made for preprocessing.
+For the scheduled host, restart the task after configuration changes.
+
 ASP.NET Core maps a double underscore (`__`) in an environment-variable name to a configuration colon (`:`). For example, `Ai__Provider` overrides `Ai:Provider` in `appsettings.json`.
 
 | Environment variable | Required | Default | Purpose |
@@ -37,7 +47,7 @@ Do not add `OPENAI_API_KEY` to `appsettings.json`, source code, a committed scri
 Open PowerShell in the repository root. Set the variables in the same window that will start the API:
 
 ```powershell
-cd C:\Users\aalmis\Documents\ChatGPT\Outlook_Mail_Adviser
+cd C:\src\OutlookMailAdviser
 
 $env:OPENAI_API_KEY = Read-Host 'OpenAI API key' -MaskInput
 $env:Ai__Provider = 'OpenAI'
@@ -119,7 +129,7 @@ Run a mail analysis and confirm that the response `model` field reports the conf
 For session-only variables, stop the API and run:
 
 ```powershell
-Remove-Item Env:Ai__Provider -ErrorAction SilentlyContinue
+$env:Ai__Provider = 'Ollama'
 Remove-Item Env:OPENAI_API_KEY -ErrorAction SilentlyContinue
 Remove-Item Env:Ai__OpenAI__Model -ErrorAction SilentlyContinue
 Remove-Item Env:Ai__OpenAI__TimeoutSeconds -ErrorAction SilentlyContinue

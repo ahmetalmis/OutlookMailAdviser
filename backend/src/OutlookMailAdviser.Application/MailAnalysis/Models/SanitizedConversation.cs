@@ -8,5 +8,5 @@ public sealed record SanitizedConversation(
     DateTimeOffset? SentAt,
     string Content,
     bool WasTruncated,
-    IReadOnlyList<string> Warnings);
-
+    IReadOnlyList<string> Warnings,
+    ContentProcessing? ContentProcessing = null);

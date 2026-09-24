@@ -1,0 +1,56 @@
+name: Public release checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      Ai__Provider: Ollama
+      DOTNET_NOLOGO: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: addin/package-lock.json
+      - name: Restore backend
+        run: dotnet restore OutlookMailAdviser.sln --configfile NuGet.config
+      - name: Build backend
+        run: dotnet build OutlookMailAdviser.sln --no-restore
+      - name: Test backend without provider credentials
+        run: dotnet test OutlookMailAdviser.sln --no-build --no-restore
+      - name: Check C# formatting
+        run: dotnet format OutlookMailAdviser.sln --no-restore --verify-no-changes
+      - name: Install frontend
+        working-directory: addin
+        run: npm ci
+      - name: Test frontend
+        working-directory: addin
+        run: npm test
+      - name: Build frontend
+        working-directory: addin
+        run: npm run build
+      - name: Validate development manifest
+        working-directory: addin
+        run: npm run validate
+      - name: Validate local host manifest
+        working-directory: addin
+        run: npm run validate:local-host
+      - name: Audit dependencies
+        run: ./scripts/Test-Dependencies.ps1
+      - name: Install checksum-pinned secret scanner
+        run: ./scripts/Install-Gitleaks.ps1
+      - name: Scan history and source for secrets
+        run: ./scripts/Test-PublicSource.ps1

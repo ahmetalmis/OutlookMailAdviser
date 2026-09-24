@@ -15,6 +15,9 @@ $env:ASPNETCORE_ENVIRONMENT = "Production"
 # environment block from the current Windows session.
 $configurationVariables = @(
     "Ai__Provider",
+    "MailProcessing__MaxInputCharacters",
+    "MailProcessing__MaxHistoryMessages",
+    "MailProcessing__MaxHistoryCharacters",
     "Ai__OpenAI__Model",
     "Ai__OpenAI__TimeoutSeconds",
     "Ai__OpenAI__MaxOutputTokens",
@@ -51,4 +54,3 @@ $process = Start-Process `
     -PassThru
 
 exit $process.ExitCode
-

@@ -59,7 +59,8 @@ public sealed class DraftMailHandler(
             command.Tone,
             gatewayResult.Model,
             gatewayResult.DurationMilliseconds,
-            sanitizedConversation.WasTruncated);
+            sanitizedConversation.WasTruncated,
+            sanitizedConversation.ContentProcessing);
     }
 
     private static string NormalizeLanguage(string preferredLanguage)

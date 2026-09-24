@@ -7,4 +7,5 @@ public sealed record DraftMailResult(
     DraftTone Tone,
     string Model,
     long DurationMilliseconds,
-    bool WasTruncated);
+    bool WasTruncated,
+    OutlookMailAdviser.Application.MailAnalysis.Models.ContentProcessing? ContentProcessing = null);

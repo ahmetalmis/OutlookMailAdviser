@@ -470,6 +470,12 @@
       addBadge(result.model, '');
       renderActions(result.actions || []);
       renderWarnings(result.warnings || []);
+      if (result.contentProcessing) {
+        const p = result.contentProcessing;
+        resultSubtitle.textContent += ' Bağlam sadeleştirildi; önceki ' +
+          p.includedHistoryMessages + ' mesaj dahil edildi (' + p.includedCharacters + ' karakter).';
+        if (p.parsingUncertain) resultSubtitle.textContent += ' Yazışma sınırları kesin olarak ayrıştırılamadı.';
+      }
       rawJson.textContent = JSON.stringify(result, null, 2);
     }
 

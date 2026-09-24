@@ -40,7 +40,8 @@ public sealed class AnalyzeMailHandler(
             analysis,
             intelligenceResult.Model,
             intelligenceResult.DurationMilliseconds,
-            sanitizedConversation.WasTruncated);
+            sanitizedConversation.WasTruncated,
+            sanitizedConversation.ContentProcessing);
     }
 
     private static string NormalizeLanguage(string preferredLanguage)

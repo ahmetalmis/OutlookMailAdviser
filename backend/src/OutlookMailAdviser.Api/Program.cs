@@ -21,6 +21,9 @@ builder.Logging.AddSimpleConsole(options =>
     options.SingleLine = true;
 });
 builder.Logging.AddDebug();
+// The middleware otherwise logs the original exception (including inner details)
+// before our redacted handler runs. The handler emits safe code/trace-id events.
+builder.Logging.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None);
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddProblemDetails(options =>

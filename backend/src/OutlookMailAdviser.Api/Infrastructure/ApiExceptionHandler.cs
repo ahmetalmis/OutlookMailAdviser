@@ -63,7 +63,7 @@ internal sealed partial class ApiExceptionHandler(
             StatusCodes.Status503ServiceUnavailable,
             "model_not_found",
             "The configured model is unavailable.",
-            exception.Message),
+            "The configured model is unavailable. Check the provider configuration."),
         ModelTimeoutException => new ApiError(
             StatusCodes.Status504GatewayTimeout,
             "model_timeout",
@@ -78,12 +78,20 @@ internal sealed partial class ApiExceptionHandler(
             StatusCodes.Status502BadGateway,
             providerException.Code,
             "The model provider returned an error.",
-            providerException.Message),
+            ProviderDetail(providerException.Code)),
         _ => new ApiError(
             StatusCodes.Status500InternalServerError,
             "internal_error",
             "An unexpected error occurred.",
             "The request could not be completed.")
+    };
+
+    private static string ProviderDetail(string code) => code switch
+    {
+        "openai_authentication_failed" => "OpenAI rejected the configured API key.",
+        "openai_rate_limited" => "OpenAI rate limit or quota was exceeded.",
+        "openai_unavailable" => "OpenAI is unreachable. Check the connection and provider configuration.",
+        _ => "The model provider could not complete the request. Check the provider configuration."
     };
 
     [LoggerMessage(

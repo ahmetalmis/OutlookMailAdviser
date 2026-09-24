@@ -14,6 +14,29 @@ namespace OutlookMailAdviser.Adapters.Tests;
 public sealed class OpenAiMailIntelligenceGatewayTests
 {
     [Fact]
+    public async Task ConnectionFailureDoesNotExposeRemoteException()
+    {
+        using var client = new HttpClient(new StubHttpMessageHandler((_, _) =>
+            throw new HttpRequestException("PRIVATE_SENTINEL remote response")));
+        var gateway = CreateGateway(client);
+        var exception = await Assert.ThrowsAsync<ModelProviderException>(() => gateway.AnalyzeAsync(
+            CreateSanitizedConversation(), new AnalysisOptions("tr"), CancellationToken.None));
+        Assert.Equal("openai_unavailable", exception.Code);
+        Assert.DoesNotContain("PRIVATE_SENTINEL", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ProviderTimeoutReturnsTypedFailure()
+    {
+        using var client = new HttpClient(new StubHttpMessageHandler((_, _) =>
+            throw new TaskCanceledException("PRIVATE_SENTINEL timeout")));
+        var gateway = CreateGateway(client);
+        var exception = await Assert.ThrowsAsync<ModelTimeoutException>(() => gateway.AnalyzeAsync(
+            CreateSanitizedConversation(), new AnalysisOptions("tr"), CancellationToken.None));
+        Assert.DoesNotContain("PRIVATE_SENTINEL", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AnalyzeAsyncSendsStrictSchemaAndMapsResponse()
     {
         var handler = new StubHttpMessageHandler((request, _) =>
@@ -34,6 +57,8 @@ public sealed class OpenAiMailIntelligenceGatewayTests
             CancellationToken.None);
 
         Assert.Equal("Tarih teyidi isteniyor.", result.Analysis.Summary);
+        Assert.Contains("HistoryMarker2", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.DoesNotContain("HistoryMarker3", handler.RequestBodies[0], StringComparison.Ordinal);
         Assert.True(result.Analysis.ActionRequired);
         Assert.Equal(new DateOnly(2026, 9, 3), result.Analysis.Actions[0].DueDate);
         Assert.True(result.Analysis.Actions[0].AssignedToCurrentUser);
@@ -105,6 +130,9 @@ public sealed class OpenAiMailIntelligenceGatewayTests
             CancellationToken.None);
 
         Assert.Equal("Re: Üretim geçişi", result.Draft.Subject);
+        Assert.Contains("CurrentMarker", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.Contains("HistoryMarker2", handler.RequestBodies[0], StringComparison.Ordinal);
+        Assert.DoesNotContain("HistoryMarker3", handler.RequestBodies[0], StringComparison.Ordinal);
         Assert.Contains("teyit ediyorum", result.Draft.Body, StringComparison.Ordinal);
         Assert.Equal("gpt-4.1-mini-2025-04-14", result.Model);
 
@@ -126,15 +154,7 @@ public sealed class OpenAiMailIntelligenceGatewayTests
             new TestOptionsMonitor<OpenAiOptions>(new OpenAiOptions { ApiKey = "test-key" }));
 
     private static SanitizedConversation CreateSanitizedConversation() =>
-        new(
-            "Üretim geçişi",
-            "Ayşe <ayse@example.com>",
-            ["Ali <ali@example.com>"],
-            [],
-            new DateTimeOffset(2026, 9, 2, 9, 0, 0, TimeSpan.FromHours(3)),
-            "Üretim geçiş tarihini teyit eder misin?",
-            false,
-            []);
+        ContextFixture.Create();
 
     private static HttpResponseMessage CreateOpenAiResponse()
     {

@@ -12,3 +12,15 @@ node_modules/
 addin/.certs/
 dist/
 certs/
+.env
+.env.*
+!.env.example
+*.log
+logs/
+*.pfx
+*.p12
+*.pem
+*.key
+*.tsbuildinfo
+output/
+tmp/

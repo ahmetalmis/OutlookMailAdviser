@@ -39,6 +39,10 @@ public sealed class MailAnalysisEndpointTests(ApiFactory factory) : IClassFixtur
             document.RootElement.GetProperty("clientRequestId").GetGuid());
         Assert.Equal("high", document.RootElement.GetProperty("priority").GetString());
         Assert.Equal("test-model", document.RootElement.GetProperty("model").GetString());
+        var processing = document.RootElement.GetProperty("contentProcessing");
+        Assert.True(processing.GetProperty("includedCharacters").GetInt32() <= 16_000);
+        Assert.Equal(0, processing.GetProperty("includedHistoryMessages").GetInt32());
+        Assert.False(processing.GetProperty("currentMessageTruncated").GetBoolean());
         Assert.True(document.RootElement.GetProperty("actionRequiredFromCurrentUser").GetBoolean());
         var action = Assert.Single(document.RootElement.GetProperty("actions").EnumerateArray());
         Assert.True(action.GetProperty("assignedToCurrentUser").GetBoolean());

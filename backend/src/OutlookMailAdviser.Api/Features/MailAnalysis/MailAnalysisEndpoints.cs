@@ -117,5 +117,6 @@ public static class MailAnalysisEndpoints
             result.Analysis.Warnings,
             result.Model,
             result.DurationMilliseconds,
-            result.WasTruncated);
+            result.WasTruncated,
+            result.ContentProcessing);
 }

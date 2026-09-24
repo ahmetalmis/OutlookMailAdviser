@@ -1,0 +1,103 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{F41882F9-AD46-40B1-AEB0-3035206E005F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Domain", "backend\src\OutlookMailAdviser.Domain\OutlookMailAdviser.Domain.csproj", "{C80F75E1-35A3-438D-B867-E3C63FA9DE51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Application", "backend\src\OutlookMailAdviser.Application\OutlookMailAdviser.Application.csproj", "{D8055880-A49B-4D23-AEE1-25761770A473}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Adapters.Ollama", "backend\src\OutlookMailAdviser.Adapters.Ollama\OutlookMailAdviser.Adapters.Ollama.csproj", "{942E3BB4-6667-41F0-841A-88992C10C63E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Adapters.OpenAI", "backend\src\OutlookMailAdviser.Adapters.OpenAI\OutlookMailAdviser.Adapters.OpenAI.csproj", "{B58B044A-84D8-4389-A33D-FF37F8D10A93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Adapters.MailContent", "backend\src\OutlookMailAdviser.Adapters.MailContent\OutlookMailAdviser.Adapters.MailContent.csproj", "{AF2FCEB1-26AA-4403-A770-F12C57085992}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Api", "backend\src\OutlookMailAdviser.Api\OutlookMailAdviser.Api.csproj", "{3B640F81-3C7A-4259-B7CA-2882829FDFBA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Domain.Tests", "backend\tests\OutlookMailAdviser.Domain.Tests\OutlookMailAdviser.Domain.Tests.csproj", "{2DBC52E1-7029-4834-89B7-61F81CD01AAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Application.Tests", "backend\tests\OutlookMailAdviser.Application.Tests\OutlookMailAdviser.Application.Tests.csproj", "{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Architecture.Tests", "backend\tests\OutlookMailAdviser.Architecture.Tests\OutlookMailAdviser.Architecture.Tests.csproj", "{FB946449-80E9-4F60-8AAC-E84A1695CBE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Api.IntegrationTests", "backend\tests\OutlookMailAdviser.Api.IntegrationTests\OutlookMailAdviser.Api.IntegrationTests.csproj", "{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookMailAdviser.Adapters.Tests", "backend\tests\OutlookMailAdviser.Adapters.Tests\OutlookMailAdviser.Adapters.Tests.csproj", "{7099C774-7A69-492C-8A14-B776F56CE36A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C80F75E1-35A3-438D-B867-E3C63FA9DE51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C80F75E1-35A3-438D-B867-E3C63FA9DE51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C80F75E1-35A3-438D-B867-E3C63FA9DE51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C80F75E1-35A3-438D-B867-E3C63FA9DE51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8055880-A49B-4D23-AEE1-25761770A473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8055880-A49B-4D23-AEE1-25761770A473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8055880-A49B-4D23-AEE1-25761770A473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8055880-A49B-4D23-AEE1-25761770A473}.Release|Any CPU.Build.0 = Release|Any CPU
+		{942E3BB4-6667-41F0-841A-88992C10C63E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{942E3BB4-6667-41F0-841A-88992C10C63E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{942E3BB4-6667-41F0-841A-88992C10C63E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{942E3BB4-6667-41F0-841A-88992C10C63E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B58B044A-84D8-4389-A33D-FF37F8D10A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B58B044A-84D8-4389-A33D-FF37F8D10A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B58B044A-84D8-4389-A33D-FF37F8D10A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B58B044A-84D8-4389-A33D-FF37F8D10A93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF2FCEB1-26AA-4403-A770-F12C57085992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF2FCEB1-26AA-4403-A770-F12C57085992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF2FCEB1-26AA-4403-A770-F12C57085992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF2FCEB1-26AA-4403-A770-F12C57085992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B640F81-3C7A-4259-B7CA-2882829FDFBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B640F81-3C7A-4259-B7CA-2882829FDFBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B640F81-3C7A-4259-B7CA-2882829FDFBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B640F81-3C7A-4259-B7CA-2882829FDFBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DBC52E1-7029-4834-89B7-61F81CD01AAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBC52E1-7029-4834-89B7-61F81CD01AAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBC52E1-7029-4834-89B7-61F81CD01AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBC52E1-7029-4834-89B7-61F81CD01AAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB946449-80E9-4F60-8AAC-E84A1695CBE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB946449-80E9-4F60-8AAC-E84A1695CBE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB946449-80E9-4F60-8AAC-E84A1695CBE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB946449-80E9-4F60-8AAC-E84A1695CBE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7099C774-7A69-492C-8A14-B776F56CE36A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7099C774-7A69-492C-8A14-B776F56CE36A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7099C774-7A69-492C-8A14-B776F56CE36A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7099C774-7A69-492C-8A14-B776F56CE36A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F} = {F41882F9-AD46-40B1-AEB0-3035206E005F}
+		{C80F75E1-35A3-438D-B867-E3C63FA9DE51} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{D8055880-A49B-4D23-AEE1-25761770A473} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{942E3BB4-6667-41F0-841A-88992C10C63E} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{B58B044A-84D8-4389-A33D-FF37F8D10A93} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{AF2FCEB1-26AA-4403-A770-F12C57085992} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{3B640F81-3C7A-4259-B7CA-2882829FDFBA} = {8D634F2E-11EE-4DF1-9CCC-C6DCCC5BFA1F}
+		{542FD1FA-9DF1-4C8C-9B42-D75A86DAC359} = {F41882F9-AD46-40B1-AEB0-3035206E005F}
+		{2DBC52E1-7029-4834-89B7-61F81CD01AAE} = {542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}
+		{58D1D3EE-497F-45B7-AFF7-E125C7DB4EE1} = {542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}
+		{FB946449-80E9-4F60-8AAC-E84A1695CBE7} = {542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}
+		{1D71E2DA-CAB8-4C33-A519-4F0CFC75AF3A} = {542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}
+		{7099C774-7A69-492C-8A14-B776F56CE36A} = {542FD1FA-9DF1-4C8C-9B42-D75A86DAC359}
+	EndGlobalSection
+EndGlobal

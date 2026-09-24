@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../OutlookMailAdviser.Domain/OutlookMailAdviser.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

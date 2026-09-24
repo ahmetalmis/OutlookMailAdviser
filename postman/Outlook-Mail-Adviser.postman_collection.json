@@ -1,0 +1,253 @@
+{
+  "info": {
+    "_postman_id": "d5940179-481f-4f9d-913d-48de257bcb45",
+    "name": "Outlook Mail Adviser API",
+    "description": "Local API requests for health checks and mail analysis. Provider credentials belong to the backend process and are not sent by Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7047",
+      "type": "string"
+    },
+    {
+      "key": "preferredLanguage",
+      "value": "tr",
+      "type": "string"
+    },
+    {
+      "key": "draftTone",
+      "value": "professional",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Service",
+      "item": [
+        {
+          "name": "Service Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Returns the API name and version."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Service metadata is returned', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.service).to.eql('Outlook Mail Adviser API');",
+                  "    pm.expect(json.version).to.eql('v1');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/live",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", "live"]
+            },
+            "description": "Checks whether the ASP.NET Core API process is running."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('API is live', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include('Healthy');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/ready",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", "ready"]
+            },
+            "description": "Checks the selected AI provider and configured model."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('AI provider is ready', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include('Healthy');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mail Analysis",
+      "item": [
+        {
+          "name": "Analyze Mail",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientRequestId\": \"{{$guid}}\",\n  \"preferredLanguage\": \"{{preferredLanguage}}\",\n  \"currentUser\": {\n    \"name\": \"Ali\",\n    \"address\": \"ali@example.com\"\n  },\n  \"message\": {\n    \"itemId\": \"postman-test-1\",\n    \"subject\": \"Üretim geçiş planı\",\n    \"from\": {\n      \"name\": \"Ayşe\",\n      \"address\": \"ayse@example.com\"\n    },\n    \"to\": [\n      {\n        \"name\": \"Ali\",\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"cc\": [],\n    \"sentAt\": \"2026-09-20T09:00:00+03:00\",\n    \"body\": \"<p>Merhaba Ali,</p><p>Üretim geçiş tarihini 21 Eylül saat 15:00'e kadar teyit eder misin?</p>\",\n    \"bodyFormat\": \"html\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/mail/analysis",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "mail", "analysis"]
+            },
+            "description": "Analyzes an email using the provider selected by the backend. OpenAI or Ollama credentials are not sent in this request."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Analysis succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Analysis contract is returned', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.clientRequestId).to.be.a('string');",
+                  "    pm.expect(json.summary).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.actionRequired).to.be.a('boolean');",
+                  "    pm.expect(json.actionRequiredFromCurrentUser).to.be.a('boolean');",
+                  "    pm.expect(json.actions).to.be.an('array');",
+                  "    json.actions.forEach(action => pm.expect(action.assignedToCurrentUser).to.be.a('boolean'));",
+                  "    pm.expect(json.priority).to.be.oneOf(['low', 'normal', 'high', 'urgent']);",
+                  "    pm.expect(json.sentiment).to.be.oneOf(['negative', 'neutral', 'positive', 'mixed']);",
+                  "    pm.expect(json.warnings).to.be.an('array');",
+                  "    pm.expect(json.model).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.durationMilliseconds).to.be.a('number');",
+                  "    pm.environment.set('lastModel', json.model);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mail Drafting",
+      "item": [
+        {
+          "name": "Create Reply Draft",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientRequestId\": \"{{$guid}}\",\n  \"preferredLanguage\": \"{{preferredLanguage}}\",\n  \"tone\": \"{{draftTone}}\",\n  \"toneDetails\": \"Hafif sert, net ve uyarıcı olsun.\",\n  \"instructions\": \"Geçiş tarihini teyit et, test için yarın saat 14:00'ü öner ve teşekkür et.\",\n  \"message\": {\n    \"itemId\": \"postman-test-1\",\n    \"subject\": \"Üretim geçiş planı\",\n    \"from\": {\n      \"name\": \"Ayşe\",\n      \"address\": \"ayse@example.com\"\n    },\n    \"to\": [\n      {\n        \"name\": \"Ali\",\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"cc\": [],\n    \"sentAt\": \"2026-09-20T09:00:00+03:00\",\n    \"body\": \"<p>Merhaba Ali,</p><p>Üretim geçiş tarihini teyit eder misin?</p>\",\n    \"bodyFormat\": \"html\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/mail/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "mail", "draft"]
+            },
+            "description": "Creates a reply subject and body using the selected tone, language, and backend AI provider."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Draft succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Draft contract is returned', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.subject).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.body).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.tone).to.eql(pm.variables.get('draftTone'));",
+                  "    pm.expect(json.model).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.durationMilliseconds).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../OutlookMailAdviser.Application/OutlookMailAdviser.Application.csproj" />
+    <ProjectReference Include="../OutlookMailAdviser.Adapters.MailContent/OutlookMailAdviser.Adapters.MailContent.csproj" />
+    <ProjectReference Include="../OutlookMailAdviser.Adapters.Ollama/OutlookMailAdviser.Adapters.Ollama.csproj" />
+    <ProjectReference Include="../OutlookMailAdviser.Adapters.OpenAI/OutlookMailAdviser.Adapters.OpenAI.csproj" />
+  </ItemGroup>
+
+</Project>

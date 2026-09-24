@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+.dotnet-cli/
+.artifacts*/
+.vs/
+TestResults/
+*.user
+*.suo
+*.nupkg
+coverage/
+node_modules/
+addin/.certs/
+dist/
+certs/

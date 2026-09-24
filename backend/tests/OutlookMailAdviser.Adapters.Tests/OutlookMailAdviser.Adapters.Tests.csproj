@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/OutlookMailAdviser.Adapters.MailContent/OutlookMailAdviser.Adapters.MailContent.csproj" />
+    <ProjectReference Include="../../src/OutlookMailAdviser.Adapters.Ollama/OutlookMailAdviser.Adapters.Ollama.csproj" />
+    <ProjectReference Include="../../src/OutlookMailAdviser.Adapters.OpenAI/OutlookMailAdviser.Adapters.OpenAI.csproj" />
+    <ProjectReference Include="../../src/OutlookMailAdviser.Application/OutlookMailAdviser.Application.csproj" />
+    <ProjectReference Include="../../src/OutlookMailAdviser.Domain/OutlookMailAdviser.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,35 @@
+@OutlookMailAdviser_Api_HostAddress = https://localhost:7047
+
+GET {{OutlookMailAdviser_Api_HostAddress}}/
+Accept: application/json
+
+###
+
+GET {{OutlookMailAdviser_Api_HostAddress}}/health/live
+
+###
+
+GET {{OutlookMailAdviser_Api_HostAddress}}/health/ready
+
+###
+
+POST {{OutlookMailAdviser_Api_HostAddress}}/api/v1/mail/analysis
+Content-Type: application/json
+
+{
+  "clientRequestId": "26ab75af-478c-4fa6-9cbb-8fd70d9c58ad",
+  "preferredLanguage": "tr",
+  "currentUser": { "name": "Ali", "address": "ali@example.com" },
+  "message": {
+    "itemId": "sample-1",
+    "subject": "Üretim geçiş planı",
+    "from": { "name": "Ayşe", "address": "ayse@example.com" },
+    "to": [{ "name": "Ali", "address": "ali@example.com" }],
+    "cc": [],
+    "sentAt": "2026-09-02T09:00:00+03:00",
+    "body": "<p>Merhaba Ali,</p><p>Üretim geçiş tarihini yarın 15:00'e kadar teyit eder misin?</p>",
+    "bodyFormat": "html"
+  }
+}
+
+###

@@ -1,0 +1,32 @@
+{
+  "name": "outlook-mail-adviser-addin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "certs": "node scripts/export-dev-cert.mjs",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "validate:local-host": "office-addin-manifest validate manifest.localhost.xml",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/office-js": "^1.0.609",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "fs-extra": "^11.4.1",
+    "jsdom": "^26.1.0",
+    "office-addin-manifest": "^3.0.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

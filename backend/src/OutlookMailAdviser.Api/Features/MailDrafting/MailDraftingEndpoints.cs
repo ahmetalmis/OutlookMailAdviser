@@ -86,7 +86,11 @@ public static class MailDraftingEndpoints
                 request.Tone,
                 request.Instructions,
                 request.PreferredLanguage ?? "tr",
-                request.ToneDetails);
+                request.ToneDetails,
+                request.SourceQuotes,
+                request.DraftMode,
+                request.TargetAudience,
+                request.Considerations);
         }
         catch (ArgumentException exception)
         {

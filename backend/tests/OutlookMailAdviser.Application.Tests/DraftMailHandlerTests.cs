@@ -68,6 +68,53 @@ public sealed class DraftMailHandlerTests
             CancellationToken.None));
     }
 
+    [Theory]
+    [InlineData(DraftMode.Reply, null, null)]
+    [InlineData(DraftMode.Forward, "  Grup müdürüm  ", "  Tarih taahhüdü verme.  ")]
+    public async Task PassesNormalizedAudienceAndConsiderations(DraftMode mode, string? audience, string? considerations)
+    {
+        var gateway = new StubDraftGateway();
+        var sanitized = new SanitizedConversation("Subject", "sender@example.com", ["recipient@example.com"], [], null, "Body", false, []);
+        var handler = new DraftMailHandler(new StubSanitizer(sanitized), gateway);
+        await handler.ExecuteAsync(new DraftMailCommand(CreateConversation(), DraftTone.Professional, "Aksiyon iste.", "tr",
+            DraftMode: mode, TargetAudience: audience, Considerations: considerations), CancellationToken.None);
+        Assert.Equal(mode, gateway.ReceivedOptions?.DraftMode);
+        Assert.Equal(audience?.Trim(), gateway.ReceivedOptions?.TargetAudience);
+        Assert.Equal(considerations?.Trim(), gateway.ReceivedOptions?.Considerations);
+    }
+
+    [Theory]
+    [InlineData(DraftMode.Forward, 0, 0)]
+    [InlineData(DraftMode.Forward, 501, 0)]
+    [InlineData(DraftMode.Reply, 0, 2001)]
+    [InlineData((DraftMode)99, 0, 0)]
+    public async Task RejectsInvalidDraftChoices(DraftMode mode, int audienceLength, int considerationsLength)
+    {
+        var gateway = new StubDraftGateway();
+        var sanitized = new SanitizedConversation("Subject", "sender@example.com", ["recipient@example.com"], [], null, "Body", false, []);
+        var handler = new DraftMailHandler(new StubSanitizer(sanitized), gateway);
+        await Assert.ThrowsAsync<ArgumentException>(() => handler.ExecuteAsync(
+            new DraftMailCommand(CreateConversation(), DraftTone.Professional, "Aksiyon iste.", "tr", DraftMode: mode,
+                TargetAudience: audienceLength == 0 ? "  " : new string('x', audienceLength),
+                Considerations: new string('x', considerationsLength)), CancellationToken.None));
+        Assert.Null(gateway.ReceivedOptions);
+    }
+
+    [Fact]
+    public async Task AcceptsExactLimitsAndIgnoresAudienceInReplyMode()
+    {
+        var gateway = new StubDraftGateway();
+        var sanitized = new SanitizedConversation("Subject", "sender@example.com", ["recipient@example.com"], [], null, "Body", false, []);
+        var handler = new DraftMailHandler(new StubSanitizer(sanitized), gateway);
+        var command = new DraftMailCommand(CreateConversation(), DraftTone.Professional, "Aksiyon iste.", "tr",
+            DraftMode: DraftMode.Forward, TargetAudience: new string('x', 500), Considerations: new string('x', 2000));
+        await handler.ExecuteAsync(command, CancellationToken.None);
+        Assert.Equal(500, gateway.ReceivedOptions?.TargetAudience?.Length);
+        Assert.Equal(2000, gateway.ReceivedOptions?.Considerations?.Length);
+        await handler.ExecuteAsync(command with { DraftMode = DraftMode.Reply }, CancellationToken.None);
+        Assert.Null(gateway.ReceivedOptions?.TargetAudience);
+    }
+
     private static MailConversation CreateConversation() =>
         new([
             new MailMessage(

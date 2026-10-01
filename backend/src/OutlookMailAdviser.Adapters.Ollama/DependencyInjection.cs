@@ -33,6 +33,8 @@ public static class DependencyInjection
                 client.Timeout = Timeout.InfiniteTimeSpan);
         services.AddTransient<IMailIntelligenceGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
+        services.AddTransient<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>(serviceProvider =>
+            serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
         services.AddTransient<IMailDraftGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
 

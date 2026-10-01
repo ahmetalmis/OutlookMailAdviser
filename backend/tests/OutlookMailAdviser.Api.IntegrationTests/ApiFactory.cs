@@ -13,6 +13,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     public StubMailIntelligenceGateway IntelligenceGateway { get; } = new();
 
+    public StubMailQuestionGateway QuestionGateway { get; } = new();
+
     public StubMailDraftGateway DraftGateway { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -28,6 +30,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll<IMailIntelligenceGateway>();
             services.AddSingleton<IMailIntelligenceGateway>(IntelligenceGateway);
+            services.RemoveAll<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>();
+            services.AddSingleton<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>(QuestionGateway);
             services.RemoveAll<IMailDraftGateway>();
             services.AddSingleton<IMailDraftGateway>(DraftGateway);
         });

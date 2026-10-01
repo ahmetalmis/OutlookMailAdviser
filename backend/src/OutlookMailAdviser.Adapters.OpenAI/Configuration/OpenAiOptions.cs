@@ -12,7 +12,7 @@ public sealed class OpenAiOptions
 
     public int TimeoutSeconds { get; set; } = 60;
 
-    public int MaxOutputTokens { get; set; } = 512;
+    public int MaxOutputTokens { get; set; } = 2048;
 
     public double Temperature { get; set; } = 0.1;
 }

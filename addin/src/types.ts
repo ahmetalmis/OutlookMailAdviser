@@ -55,6 +55,8 @@ export interface AnalyzeMailResponse {
 
 export type DraftTone = "professional" | "friendly" | "concise" | "persuasive" | "empathetic";
 
+export type DraftMode = "reply" | "forward";
+
 export interface DraftMailRequest {
   clientRequestId: string;
   preferredLanguage: string;
@@ -62,6 +64,10 @@ export interface DraftMailRequest {
   tone: DraftTone;
   toneDetails?: string;
   instructions: string;
+  sourceQuotes?: string[];
+  draftMode?: DraftMode;
+  targetAudience?: string;
+  considerations?: string;
 }
 
 export interface DraftMailResponse {
@@ -77,7 +83,24 @@ export interface DraftMailResponse {
 
 export interface ApiStatus {
   state: "healthy" | "unhealthy";
+  code?: string;
   provider?: string;
   model?: string;
   detail?: string;
+}
+
+export interface QuestionSource {
+  id: string;
+  quote: string;
+  startOffset: number;
+}
+
+export interface MailQuestionResponse {
+  errorCode?: string | null;
+  answer: string;
+  sources: QuestionSource[];
+  completedChunks: number;
+  totalChunks: number;
+  isPartial: boolean;
+  warnings: string[];
 }

@@ -10,8 +10,14 @@ using OutlookMailAdviser.Domain.Mails;
 namespace OutlookMailAdviser.Adapters.MailContent;
 
 public sealed partial class HtmlMailContentSanitizer(
-    IOptionsMonitor<MailContentOptions> optionsMonitor) : IMailContentSanitizer
+    IOptionsMonitor<MailContentOptions> optionsMonitor) : IMailContentSanitizer, OutlookMailAdviser.Application.MailQuestions.IFullMailContentReader
 {
+    public string ReadFullBody(MailMessage message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        return CleanBody(message.Body, message.BodyFormat);
+    }
+
     private const string TruncationWarning =
         "İçeriğin bir bölümü analize dahil edilemedi.";
 

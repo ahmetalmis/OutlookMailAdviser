@@ -2,7 +2,23 @@
 
 Bu klasör, açık Outlook e-postasını okuyup mevcut .NET API'ye gönderen React + TypeScript task pane uygulamasıdır. Add-in yalnızca `ReadItem` izni ister; e-postayı değiştirmez ve yanıt göndermez.
 
-## İlk kurulum
+## Bu bilgisayarda günlük kullanım
+
+`OutlookMailAdviser` Windows hizmeti arayüzü ve API'yi birlikte
+`https://localhost:7047/addin/index.html` adresinde sunar ve Windows açılışında otomatik başlar.
+Vite veya terminal açmanız gerekmez. Outlook'a `manifest.xml` ya da onun aynı içeriğe
+sahip kopyası `manifest.localhost.xml` yüklenir. Geliştirme yayını yalnızca ayrı kimlikli
+`manifest.dev.xml` dosyasıyla kullanılır; 3000 portunun kapalı olması günlük yayını etkilemez.
+
+Paneldeki API durumu artık anahtar/token reddi, erişim izni, kota, hız sınırı ve bağlantı
+hatalarını açıklamasıyla gösterir. Anahtarı hizmet yapılandırmasında düzelttikten sonra
+**Yeniden kontrol et** seçilebilir. Analiz, taslak ve soru işlemleri de giriş/çıkış token
+sınırını ve sağlayıcı hatalarını gösterir. API anahtarı ve ham sağlayıcı hata metni gösterilmez.
+Bu mesajlar panel yüklendikten sonra görünür; Outlook'un paneli başlatamaması ayrı bir Office hatasıdır.
+
+Hizmet kurulumu ve güncellemesi için [Windows hizmeti rehberine](../docs/windows-service.md) bakın.
+
+## Geliştirme ortamı (opsiyonel)
 
 Node.js 22.12 veya üzeri gereklidir. PowerShell'de:
 
@@ -44,7 +60,7 @@ VITE_API_BASE_URL=https://localhost:7047
 
 1. Tarayıcıda `https://aka.ms/olksideload` adresini açın.
 2. **My add-ins / Eklentilerim** bölümünde **Custom Addins / Özel eklentiler** seçeneğini bulun.
-3. **Add from File / Dosyadan ekle** ile `addin/manifest.xml` dosyasını yükleyin.
+3. **Add from File / Dosyadan ekle** ile `addin/manifest.dev.xml` dosyasını yükleyin.
 4. Outlook'ta bir e-postayı okuma modunda açın.
 5. Yeni Outlook veya Outlook Web'de **Apps / Uygulamalar → Outlook Mail Adviser → Maili analiz et** yolunu izleyin. Klasik Outlook'ta düğme şeritte görünür.
 
@@ -54,11 +70,14 @@ Analiz isteği, Outlook'taki aktif kullanıcının görünen adını ve SMTP adr
 
 Analiz tamamlandıktan sonra **Mail hazırla** bölümü görünür:
 
-1. `Profesyonel`, `Samimi`, `Kısa ve net`, `İkna edici` veya `Empatik` tonlarından birini seçin.
-2. İsterseniz **Ton detayı** alanına “Hafif sert, net ve uyarıcı olsun” gibi en fazla 500 karakterlik ek üslup yönlendirmesi yazın.
-3. **Açıklama / yanıt özeti** alanına vermek istediğiniz cevabın ana fikrini yazın.
-4. **Yanıt taslağı oluştur** düğmesine basın.
-5. Oluşan konu ve gövdeyi **Kopyala** ile Outlook yanıtına aktarın.
+1. **Yazışma türü** olarak **Gönderene yanıt** veya **Başka kişilere ilet** seçin.
+2. İletme için **Kime yazılacak?** alanına isim veya rol girin (en fazla 500 karakter); birden fazla muhatap yazabilirsiniz. E-posta adresi gerekmez.
+3. Tonu seçin; isterseniz **Ton detayı** alanına en fazla 500 karakterlik üslup yönlendirmesi yazın.
+4. **Mailin amacı / ana mesajı** alanına ne anlatmak istediğinizi yazın.
+5. İsteğe bağlı **Dikkat edilecek hususlar** alanına “Kişisel suçlama yapma, tarih taahhüdü verme” gibi mail bazında kurallar girin (en fazla 2000 karakter).
+6. **Taslak oluştur** düğmesine basın. Konuyu ayrıca kullanın; **Kopyala** yalnızca gövdeyi panoya alır.
+
+İletme modunda özgün mail kaynak olarak kullanılır; taslak belirttiğiniz muhataba hitap eder. Örneğin Dilek Hanım'dan gelen geri bildirim için “Grup müdürüm” yazarak yönetimden aksiyon isteyen bir metin hazırlayabilirsiniz. Yeni maile geçildiğinde tür varsayılana döner; muhatap, ana mesaj ve hususlar temizlenir. Hususlar kalıcı olarak saklanmaz.
 
 Taslak, analiz için seçilen çıktı dilinde hazırlanır. Bu POC sürümü Outlook mesajını otomatik değiştirmez ve mail göndermez; kullanıcı taslağı görüp kopyalayarak son kontrolü yapar.
 
@@ -87,7 +106,7 @@ API CORS ayarı `https://localhost:3000` origin'ine izin verir. Portu değiştir
 
 ## Sürekli çalışan yerel kurulum
 
-Geliştirme manifesti `manifest.xml`, Vite sunucusundaki
+Geliştirme manifesti `manifest.dev.xml`, Vite sunucusundaki
 `https://localhost:3000` adresini kullanır. Windows oturumu açıldığında başlayan
 kalıcı kurulum ise `manifest.localhost.xml` dosyasını kullanır ve add-in ile
 API'yi tek origin üzerinden sunar:
@@ -98,6 +117,12 @@ https://localhost:7047/addin/index.html
 
 Kalıcı kurulumu repository kökünden yapmak için [ayrıntılı geliştirme rehberindeki](../docs/DEVELOPMENT.md) **Windows'ta
 sürekli çalıştırma** bölümünü izleyin. Kurulumdan sonra Outlook'a
-`.artifacts/local-host/manifest.xml` dosyasını bir kez yükleyin. Aynı add-in
-kimliği kullanıldığı için Outlook mevcut geliştirme kaydını bu adreslerle
-günceller.
+`manifest.xml` veya `manifest.localhost.xml` dosyasını yükleyin. Geliştirme eklentisi
+ayrı kimliğe sahiptir; günlük kullanım için **Outlook Mail Adviser** eklentisini seçin.
+
+## 1.0.0: Yazışmaya soru sorma
+
+Açık e-postanın altında **Bu yazışmaya sor** alanı yer alır. Soru sormak için önce analiz yapmak
+gerekmez. Gövde içindeki geçmişin tamamı incelenir. Yanıtın kaynaklarını seçip **Taslakta kullan**
+ile taslak hazırlama alanına aktarabilirsiniz. İptal ve e-posta değişimi bekleyen soru sonucunu
+geçersiz kılar. İşlem sürerken ilerleme göstergesi, sonuçta incelenen bölüm sayısı gösterilir.

@@ -5,16 +5,15 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
   <Id>8f777abc-707d-4c23-b609-5f138a45dd1a</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.2.0</Version>
   <ProviderName>Outlook Mail Adviser</ProviderName>
   <DefaultLocale>tr-TR</DefaultLocale>
   <DisplayName DefaultValue="Outlook Mail Adviser" />
   <Description DefaultValue="Açık e-postayı yapılandırılmış AI sağlayıcısıyla analiz eder." />
-  <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
-  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png" />
-  <SupportUrl DefaultValue="https://localhost:3000/" />
+  <IconUrl DefaultValue="https://localhost:7047/addin/assets/icon-64.png" />
+  <HighResolutionIconUrl DefaultValue="https://localhost:7047/addin/assets/icon-128.png" />
+  <SupportUrl DefaultValue="https://localhost:7047/addin/" />
   <AppDomains>
-    <AppDomain>https://localhost:3000</AppDomain>
     <AppDomain>https://localhost:7047</AppDomain>
   </AppDomains>
   <Hosts>
@@ -28,7 +27,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:3000/index.html" />
+        <SourceLocation DefaultValue="https://localhost:7047/addin/index.html?v=1.0.2.0" />
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -77,13 +76,13 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16" DefaultValue="https://localhost:3000/assets/icon-16.png" />
-        <bt:Image id="Icon.32" DefaultValue="https://localhost:3000/assets/icon-32.png" />
-        <bt:Image id="Icon.80" DefaultValue="https://localhost:3000/assets/icon-80.png" />
+        <bt:Image id="Icon.16" DefaultValue="https://localhost:7047/addin/assets/icon-16.png" />
+        <bt:Image id="Icon.32" DefaultValue="https://localhost:7047/addin/assets/icon-32.png" />
+        <bt:Image id="Icon.80" DefaultValue="https://localhost:7047/addin/assets/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/index.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/index.html" />
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:7047/addin/index.html?v=1.0.2.0" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:7047/addin/index.html?v=1.0.2.0" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="Group.Label" DefaultValue="Mail Adviser" />

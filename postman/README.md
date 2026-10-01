@@ -73,3 +73,24 @@ For a manual chain test, append three blocks to the HTML body, each containing
 `From:`, `Sent:`, `To:`, `Subject:` on separate lines followed by unique
 message text. Expect two included history messages, `historyLimited=true`,
 and `currentMessageTruncated=false` for a short current message.
+
+## 1.0.0: Questions about the current correspondence
+
+**Mail Questions / Ask Current Correspondence** examines the entire supplied body, including quoted
+history. A 200 response can be partial: inspect `isPartial`, `completedChunks`, `totalChunks`, and
+`warnings` before interpreting absence of evidence. **Draft With Source Quotes** demonstrates the
+optional `sourceQuotes` array; changing a quote to text absent from the body returns 400.
+
+### Muhataba göre taslak
+
+`POST /api/v1/mail/draft` için mevcut alanlara aşağıdakiler eklenebilir:
+
+```json
+{
+  "draftMode": "forward",
+  "targetAudience": "Grup müdürüm ve operasyon yöneticisi",
+  "considerations": "Kişisel suçlama yapma, tarih taahhüdü verme."
+}
+```
+
+`draftMode` gönderilmezse `reply` kullanılır. `forward` için `targetAudience` zorunludur (500 karakter); `considerations` isteğe bağlıdır (2000 karakter). Bu alanları mevcut `message`, `tone` ve `instructions` alanlarıyla birlikte gönderin. Yanıt şeması değişmez; otomatik iletme veya gönderim yapılmaz.

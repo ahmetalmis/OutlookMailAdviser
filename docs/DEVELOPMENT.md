@@ -205,7 +205,7 @@ Varsayılan OpenAI modeli `gpt-4.1-mini`'dir. Model ve üretim seçenekleri ayn�
 
 ```powershell
 $env:Ai__OpenAI__Model = 'gpt-4.1-mini'
-$env:Ai__OpenAI__MaxOutputTokens = '512'
+$env:Ai__OpenAI__MaxOutputTokens = '2048'
 $env:Ai__OpenAI__TimeoutSeconds = '60'
 ```
 
@@ -234,9 +234,11 @@ npm run certs
 npm run dev
 ```
 
-Ardından `addin/manifest.xml` dosyasını Outlook'ta özel eklenti olarak yükleyin. API'nin ayrı terminalde `https://localhost:7047` adresinde çalışıyor olması gerekir.
+Ardından `addin/manifest.dev.xml` dosyasını Outlook'ta özel eklenti olarak yükleyin. API'nin ayrı terminalde `https://localhost:7047` adresinde çalışıyor olması gerekir.
 
 ## Windows'ta sürekli çalıştırma
+
+Windows açılışında oturumdan bağımsız çalışan kurulum için [Windows hizmeti rehberini](windows-service.md) kullanın. Aşağıdaki zamanlanmış görev yöntemi eski, oturum açılışına bağlı alternatiftir; Windows hizmetiyle birlikte etkinleştirmeyin.
 
 Kalıcı yerel kurulumda Vite geliştirme sunucusu kullanılmaz. React uygulaması
 production build olarak hazırlanır, .NET API'nin `wwwroot/addin` klasöründen

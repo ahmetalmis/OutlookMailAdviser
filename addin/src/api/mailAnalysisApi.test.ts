@@ -45,7 +45,7 @@ describe("analyzeMail", () => {
 
     await expect(analyzeMail(request)).rejects.toEqual(
       expect.objectContaining<Partial<MailAnalysisApiError>>({
-        message: "Model output is invalid.",
+        message: "AI yanıtı beklenen biçimde değil. Yeniden deneyin.",
         status: 502,
         code: "invalid_model_response",
       }),

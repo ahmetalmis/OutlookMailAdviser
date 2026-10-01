@@ -9,4 +9,8 @@ public sealed record DraftMailRequest(
     DraftTone Tone,
     string? Instructions,
     MailMessageRequest? Message,
-    string? ToneDetails = null);
+    string? ToneDetails = null,
+    IReadOnlyList<string>? SourceQuotes = null,
+    DraftMode DraftMode = DraftMode.Reply,
+    string? TargetAudience = null,
+    string? Considerations = null);

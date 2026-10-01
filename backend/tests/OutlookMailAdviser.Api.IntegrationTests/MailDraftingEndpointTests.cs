@@ -46,6 +46,7 @@ public sealed class MailDraftingEndpointTests(ApiFactory factory) : IClassFixtur
         Assert.True(processing.GetProperty("includedCharacters").GetInt32() <= 16_000);
         Assert.Equal(0, processing.GetProperty("includedHistoryMessages").GetInt32());
         Assert.False(processing.GetProperty("currentMessageTruncated").GetBoolean());
+        Assert.Equal(DraftMode.Reply, factory.DraftGateway.ReceivedOptions?.DraftMode);
         Assert.Equal(DraftTone.Friendly, factory.DraftGateway.ReceivedOptions?.Tone);
         Assert.Equal(
             "Hafif sert ve uyarıcı olsun.",
@@ -77,5 +78,32 @@ public sealed class MailDraftingEndpointTests(ApiFactory factory) : IClassFixtur
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    [Theory]
+    [InlineData("forward", "Grup müdürüm", 200, 50)]
+    [InlineData("forward", "  ", 400, 50)]
+    [InlineData("invalid", "Grup müdürüm", 400, 50)]
+    [InlineData("forward", "Grup müdürüm", 400, 2001)]
+    public async Task ValidatesAndPassesForwardChoices(string mode, string audience, int status, int length)
+    {
+        var considerations = new string('x', length);
+        using var response = await _client.PostAsJsonAsync("/api/v1/mail/draft", new
+        {
+            tone = "professional", instructions = "Yönetimden aksiyon iste.",
+            draftMode = mode, targetAudience = audience, considerations,
+            message = new
+            {
+                subject = "Geri bildirim", from = new { name = "Dilek", address = "dilek@example.com" },
+                to = new[] { new { address = "recipient@example.com" } },
+                body = "Destek sürecindeki sorunlar", bodyFormat = "plainText"
+            }
+        });
+        Assert.Equal((HttpStatusCode)status, response.StatusCode);
+        if (status == 200)
+        {
+            Assert.Equal(DraftMode.Forward, factory.DraftGateway.ReceivedOptions?.DraftMode);
+            Assert.Equal(audience, factory.DraftGateway.ReceivedOptions?.TargetAudience);
+            Assert.Equal(considerations, factory.DraftGateway.ReceivedOptions?.Considerations);
+        }
     }
 }

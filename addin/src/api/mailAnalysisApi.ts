@@ -2,9 +2,12 @@ import type {
   AnalyzeMailRequest,
   AnalyzeMailResponse,
   ApiStatus,
+  MailMessage,
+  MailQuestionResponse,
   DraftMailRequest,
   DraftMailResponse,
 } from "../types";
+import { providerErrorMessage } from "./providerErrors";
 
 const defaultBaseUrl = import.meta.env.DEV
   ? "https://localhost:7047"
@@ -51,7 +54,7 @@ export async function analyzeMail(
   if (!response.ok) {
     const problem = await parseProblem(response);
     throw new MailAnalysisApiError(
-      problem.detail ?? problem.title ?? `API isteği başarısız oldu (${response.status}).`,
+      providerErrorMessage(problem.code, problem.detail ?? problem.title ?? `API isteği başarısız oldu (${response.status}).`),
       response.status,
       problem.code,
     );
@@ -74,7 +77,7 @@ export async function draftMail(
   if (!response.ok) {
     const problem = await parseProblem(response);
     throw new MailAnalysisApiError(
-      problem.detail ?? problem.title ?? `Taslak isteği başarısız oldu (${response.status}).`,
+      providerErrorMessage(problem.code, problem.detail ?? problem.title ?? `Taslak isteği başarısız oldu (${response.status}).`),
       response.status,
       problem.code,
     );
@@ -85,27 +88,53 @@ export async function draftMail(
 
 export async function getApiStatus(signal?: AbortSignal): Promise<ApiStatus> {
   try {
-    const response = await fetch(`${apiBaseUrl}/health/ready`, { signal });
-    if (!response.ok) {
-      return { state: "unhealthy", detail: `HTTP ${response.status}` };
-    }
+    const timeout = AbortSignal.timeout(15000);
+    const response = await fetch(`${apiBaseUrl}/health/ready`, {
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+      cache: "no-store",
+    });
 
     if (response.headers.get("content-type")?.includes("application/json")) {
       const payload = (await response.json()) as Record<string, unknown>;
       const data = payload.data as Record<string, unknown> | undefined;
+      const code = typeof payload.code === "string" ? payload.code : undefined;
       return {
-        state: "healthy",
+        state: response.ok ? "healthy" : "unhealthy",
         provider: typeof data?.provider === "string" ? data.provider : undefined,
         model: typeof data?.model === "string" ? data.model : undefined,
+        code,
+        detail: response.ok ? undefined : providerErrorMessage(code, `AI sağlayıcısı hazır değil (HTTP ${response.status}).`),
       };
     }
 
     // ASP.NET Core's default health-check writer returns plain text ("Healthy").
-    return { state: "healthy" };
+    return response.ok ? { state: "healthy" }
+      : { state: "unhealthy", detail: `AI sağlayıcısı hazır değil (HTTP ${response.status}).` };
   } catch (error) {
     return {
       state: "unhealthy",
-      detail: error instanceof Error ? error.message : "API'ye ulaşılamadı.",
+      detail: error instanceof Error && error.name === "TimeoutError"
+        ? "Bağlantı kontrolü zaman aşımına uğradı. Yeniden deneyin."
+        : "Yerel API'ye ulaşılamadı. OutlookMailAdviser Windows hizmetini ve HTTPS bağlantısını kontrol edin.",
     };
   }
+}
+
+export async function askMailQuestion(
+  message: MailMessage, question: string, preferredLanguage: string, signal?: AbortSignal,
+): Promise<MailQuestionResponse> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/mail/questions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, question, preferredLanguage }),
+    signal,
+  });
+  if (!response.ok) {
+    const problem = await parseProblem(response);
+    throw new MailAnalysisApiError(
+      providerErrorMessage(problem.code, problem.detail ?? problem.title ?? `Soru yanıtlanamadı (${response.status}).`),
+      response.status, problem.code,
+    );
+  }
+  return await response.json() as MailQuestionResponse;
 }

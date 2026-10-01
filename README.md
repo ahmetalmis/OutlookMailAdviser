@@ -73,9 +73,9 @@ npm run certs
 npm run dev
 ```
 
-API `https://localhost:7047`, arayüz `https://localhost:3000` üzerinde çalışır. [Outlook'a yükleme adımlarını](addin/README.md) izleyerek `addin/manifest.xml` dosyasını yükleyin. Anahtar hiçbir `VITE_*` değişkenine yazılmaz. Yerel `.env.local` dosyası yalnızca API adresi gibi gizli olmayan frontend ayarları içindir.
+Geliştirmede API `https://localhost:7047`, arayüz `https://localhost:3000` üzerinde çalışır. [Outlook'a yükleme adımlarını](addin/README.md) izleyerek `addin/manifest.dev.xml` dosyasını yükleyin. Anahtar hiçbir `VITE_*` değişkenine yazılmaz. Yerel `.env.local` dosyası yalnızca API adresi gibi gizli olmayan frontend ayarları içindir.
 
-Kalıcı Windows kurulumu ve kaldırma: [ayrıntılı geliştirme rehberi](docs/DEVELOPMENT.md).
+Kalıcı Windows hizmeti, otomatik başlangıç ve güncelleme: [Windows hizmeti rehberi](docs/windows-service.md). Günlük kullanımda arayüz ve API 7047 üzerinden sunulur; `addin/manifest.xml` veya `addin/manifest.localhost.xml` kullanılır. Vite başlatılması gerekmez.
 Sağlayıcı değişiklikleri: [yapılandırma rehberi](PROVIDER-CONFIGURATION.md).
 
 ## Test ve güvenlik kontrolleri
@@ -111,3 +111,31 @@ Otomatik testler gerçek modele veya API anahtarına ihtiyaç duymaz. Manifest d
 [Üçüncü taraf lisansları ve varlık kaynakları](THIRD-PARTY-NOTICES.md).
 Sorun bildirirken gerçek e-posta, kişisel veri veya API anahtarı paylaşmayın.
 Güvenlik sorunları için [özel bildirim yönergesini](SECURITY.md) izleyin.
+
+## 1.0.0 — Bu yazışmaya sor
+
+Outlook eklentisindeki **Bu yazışmaya sor** alanına açık e-postayla ilgili bir soru yazın.
+Genel analiz yapmanız gerekmez. Örneğin: “Teslim tarihiyle ilgili daha önce ne söylenmiş?”
+Yalnızca açık e-postanın gövdesi ve bu gövdenin içinde bulunan geçmiş yazışmalar kullanılır;
+posta kutusundaki başka mesajlara veya eklere erişilmez, indeks veya kalıcı arşiv oluşturulmaz.
+
+Soru akışı, normal analizdeki geçmiş mesaj/karakter sınırlarını uygulamaz. Temizlenmiş gövdenin
+tamamını modelin bağlam bütçesine göre örtüşen parçalarda inceler. Uzun yazışmalar birden fazla
+model çağrısı gerektirir. İşlem iptal edilebilir. Tamamlanan/toplam bölüm sayısı sonuçta gösterilir;
+zaman aşımı veya doğrulanamayan alıntı durumunda sonuç açıkça **kısmi** olarak işaretlenir.
+
+Yanıtın altında metinle birebir doğrulanmış kaynak alıntıları bulunur. Alıntıda yer alan tarih ve
+gönderen başlıkları korunur; olmayan bilgiler eklenmez. Birden fazla bölümde bulgu varsa ve kanıtlar
+model bütçesine sığıyorsa çelişkileri karşılaştıran birleşik yanıt oluşturulur. Sığmıyorsa bölüm
+bulguları ve karşılaştırmanın yapılamadığı uyarısı gösterilir; hiçbir kaynak sessizce atılmaz.
+Modelin yorumunu alıntılar üzerinden kontrol edin.
+
+Alıntıları seçip **Taslakta kullan** düğmesine basın (en fazla 20 alıntı / toplam 4000 karakter).
+Mevcut ton ve yanıt talimatlarıyla taslak oluşturabilirsiniz. Sunucu kaynakları mevcut e-posta
+gövdesine karşı yeniden doğrular. Başka bir e-postaya geçildiğinde kaynaklar ve sonuçlar temizlenir.
+
+API: `POST /api/v1/mail/questions`, gövde: `{ "message": <mevcut mesaj>, "question": "...", "preferredLanguage": "tr" }`.
+Yanıt: `answer`, `sources` (`id`, `quote`, temizlenmiş gövde içindeki UTF-16 `startOffset`),
+`completedChunks`, `totalChunks`, `isPartial`, `warnings`. Soru en fazla 1000 karakterdir;
+yapılandırılan model bağlamı soruya yer bırakmıyorsa 400 döner. `POST /api/v1/mail/draft`
+isteğindeki isteğe bağlı `sourceQuotes` dizisi seçilen alıntıları taşır. Kaynaksız mevcut istekler uyumludur.

@@ -11,6 +11,8 @@ using OutlookMailAdviser.Api.Features.MailDrafting;
 using OutlookMailAdviser.Api.Infrastructure;
 using OutlookMailAdviser.Application.MailAnalysis;
 using OutlookMailAdviser.Application.MailDrafting;
+using OutlookMailAdviser.Application.MailQuestions;
+using OutlookMailAdviser.Api.Features.MailQuestions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,7 @@ builder.Logging.AddSimpleConsole(options =>
     options.SingleLine = true;
 });
 builder.Logging.AddDebug();
+builder.Host.UseWindowsService(options => options.ServiceName = "OutlookMailAdviser");
 // The middleware otherwise logs the original exception (including inner details)
 // before our redacted handler runs. The handler emits safe code/trace-id events.
 builder.Logging.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None);
@@ -45,6 +48,7 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 builder.Services.AddScoped<IAnalyzeMailUseCase, AnalyzeMailHandler>();
 builder.Services.AddScoped<IDraftMailUseCase, DraftMailHandler>();
+builder.Services.AddScoped<IAskMailQuestionUseCase, MailQuestionHandler>();
 builder.Services.AddMailContentAdapter(builder.Configuration);
 
 var aiProvider = builder.Configuration["Ai:Provider"]?.Trim();
@@ -92,7 +96,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("OutlookAddIn");
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (context.Context.Request.Path.Equals("/addin/index.html", StringComparison.OrdinalIgnoreCase)
+            || context.Context.Request.Path.Equals("/addin/", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+            context.Context.Response.Headers.Pragma = "no-cache";
+            context.Context.Response.Headers.Expires = "0";
+        }
+    }
+});
 
 app.MapGet("/", () => Results.Ok(new
 {
@@ -111,11 +127,13 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
-    Predicate = registration => registration.Tags.Contains("ready")
+    Predicate = registration => registration.Tags.Contains("ready"),
+    ResponseWriter = ReadinessResponseWriter.WriteAsync
 });
 
 app.MapMailAnalysisEndpoints();
 app.MapMailDraftingEndpoints();
+app.MapMailQuestionEndpoints();
 
 app.Run();
 

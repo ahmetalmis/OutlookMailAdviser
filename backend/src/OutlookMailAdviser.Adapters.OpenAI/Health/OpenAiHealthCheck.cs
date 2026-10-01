@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using OutlookMailAdviser.Adapters.OpenAI.Configuration;
+using OutlookMailAdviser.Application.MailAnalysis.Exceptions;
 
 namespace OutlookMailAdviser.Adapters.OpenAI.Health;
 
@@ -24,23 +25,26 @@ internal sealed class OpenAiHealthCheck(
         {
             using var response = await httpClient.SendAsync(request, cancellationToken);
 
-            return response.IsSuccessStatusCode
-                ? HealthCheckResult.Healthy(
+            if (response.IsSuccessStatusCode)
+                return HealthCheckResult.Healthy(
                     "OpenAI is reachable.",
-                    new Dictionary<string, object> { ["model"] = options.Model })
-                : HealthCheckResult.Unhealthy(
-                    $"OpenAI returned HTTP {(int)response.StatusCode}.");
+                    new Dictionary<string, object> { ["model"] = options.Model });
+
+            return Failure(await OpenAiFailure.GetCodeAsync(response, cancellationToken));
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return HealthCheckResult.Unhealthy("OpenAI health check timed out.");
+            return Failure("model_timeout");
         }
         catch (HttpRequestException)
         {
-            return HealthCheckResult.Unhealthy("OpenAI is not reachable.");
+            return Failure("openai_unavailable");
         }
     }
 
     private static string EnsureTrailingSlash(string value) =>
         value.EndsWith('/') ? value : $"{value}/";
+
+    private static HealthCheckResult Failure(string code) => HealthCheckResult.Unhealthy(
+        ProviderErrorDetails.GetDetail(code), data: new Dictionary<string, object> { ["code"] = code });
 }

@@ -31,7 +31,7 @@ ASP.NET Core maps a double underscore (`__`) in an environment-variable name to 
 | `OPENAI_API_KEY` | OpenAI only | None | Secret API key used by the OpenAI adapter. |
 | `Ai__OpenAI__Model` | No | `gpt-4.1-mini` | OpenAI model ID. |
 | `Ai__OpenAI__TimeoutSeconds` | No | `60` | OpenAI request timeout. |
-| `Ai__OpenAI__MaxOutputTokens` | No | `512` | Maximum OpenAI response tokens. |
+| `Ai__OpenAI__MaxOutputTokens` | No | `2048` | Maximum OpenAI response tokens. |
 | `Ai__OpenAI__Temperature` | No | `0.1` | OpenAI sampling temperature. |
 | `Ai__OpenAI__BaseUrl` | No | `https://api.openai.com/v1/` | OpenAI API base URL. |
 | `Ai__Ollama__Model` | No | `qwen3.5:4b` | Ollama model tag. |

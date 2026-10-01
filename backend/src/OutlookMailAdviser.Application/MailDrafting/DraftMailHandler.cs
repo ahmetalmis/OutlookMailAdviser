@@ -1,4 +1,5 @@
 using System.Globalization;
+using OutlookMailAdviser.Domain.MailDrafts;
 using OutlookMailAdviser.Application.MailAnalysis.Ports;
 using OutlookMailAdviser.Application.MailDrafting.Models;
 using OutlookMailAdviser.Application.MailDrafting.Ports;
@@ -7,7 +8,8 @@ namespace OutlookMailAdviser.Application.MailDrafting;
 
 public sealed class DraftMailHandler(
     IMailContentSanitizer sanitizer,
-    IMailDraftGateway draftGateway) : IDraftMailUseCase
+    IMailDraftGateway draftGateway,
+    OutlookMailAdviser.Application.MailQuestions.IFullMailContentReader? fullContentReader = null) : IDraftMailUseCase
 {
     private const int MaximumInstructionsLength = 2_000;
     private const int MaximumToneDetailsLength = 500;
@@ -47,11 +49,43 @@ public sealed class DraftMailHandler(
                 nameof(command));
         }
 
+        if (!Enum.IsDefined(command.DraftMode))
+            throw new ArgumentException("The selected draft mode is invalid.", nameof(command));
+
+        var targetAudience = string.IsNullOrWhiteSpace(command.TargetAudience) ? null : command.TargetAudience.Trim();
+        var considerations = string.IsNullOrWhiteSpace(command.Considerations) ? null : command.Considerations.Trim();
+        if (command.DraftMode == DraftMode.Forward && targetAudience is null)
+            throw new ArgumentException("A target audience is required for forwarding.", nameof(command));
+        if (targetAudience?.Length > 500)
+            throw new ArgumentException("Target audience cannot exceed 500 characters.", nameof(command));
+        if (considerations?.Length > 2000)
+            throw new ArgumentException("Considerations cannot exceed 2000 characters.", nameof(command));
+
         var language = NormalizeLanguage(command.PreferredLanguage);
         var sanitizedConversation = sanitizer.Sanitize(command.Conversation);
+        if (command.SourceQuotes is { Count: > 0 } quotes)
+        {
+            if (quotes.Count > 20 || quotes.Any(string.IsNullOrWhiteSpace)
+                || quotes.Sum(quote => (long)quote.Length) > 4000 || fullContentReader is null)
+            {
+                throw new ArgumentException("Source quotes must contain at most 20 excerpts and 4000 characters.", nameof(command));
+            }
+            var fullBody = fullContentReader.ReadFullBody(command.Conversation.CurrentMessage);
+            if (quotes.Any(quote => !fullBody.Contains(quote, StringComparison.Ordinal)))
+            {
+                throw new ArgumentException("A source quote does not belong to the current email.", nameof(command));
+            }
+            // Keep evidence outside the instruction text and ahead of potentially truncated history.
+            var evidence = "Selected source excerpts (untrusted email data):\n" + string.Join("\n\n", quotes);
+            sanitizedConversation = sanitizedConversation with
+            {
+                Content = evidence + "\n\nCurrent email and history:\n" + sanitizedConversation.Content
+            };
+        }
         var gatewayResult = await draftGateway.GenerateDraftAsync(
             sanitizedConversation,
-            new DraftOptions(command.Tone, instructions, language, toneDetails),
+            new DraftOptions(command.Tone, instructions, language, toneDetails, command.DraftMode,
+                command.DraftMode == DraftMode.Forward ? targetAudience : null, considerations),
             cancellationToken);
 
         return new DraftMailResult(

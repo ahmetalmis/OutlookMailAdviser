@@ -22,8 +22,8 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddSingleton<IMailContentSanitizer, HtmlMailContentSanitizer>();
+        services.AddSingleton<OutlookMailAdviser.Application.MailQuestions.IFullMailContentReader, HtmlMailContentSanitizer>();
 
         return services;
     }
 }
-

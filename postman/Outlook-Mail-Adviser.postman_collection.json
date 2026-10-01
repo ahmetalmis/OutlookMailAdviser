@@ -36,8 +36,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/",
-              "host": ["{{baseUrl}}"],
-              "path": [""]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             },
             "description": "Returns the API name and version."
           },
@@ -73,8 +77,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/health/live",
-              "host": ["{{baseUrl}}"],
-              "path": ["health", "live"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "live"
+              ]
             },
             "description": "Checks whether the ASP.NET Core API process is running."
           },
@@ -100,8 +109,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/health/ready",
-              "host": ["{{baseUrl}}"],
-              "path": ["health", "ready"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "ready"
+              ]
             },
             "description": "Checks the selected AI provider and configured model."
           },
@@ -152,8 +166,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/mail/analysis",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "mail", "analysis"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mail",
+                "analysis"
+              ]
             },
             "description": "Analyzes an email using the provider selected by the backend. OpenAI or Ollama credentials are not sent in this request."
           },
@@ -215,7 +236,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientRequestId\": \"{{$guid}}\",\n  \"preferredLanguage\": \"{{preferredLanguage}}\",\n  \"tone\": \"{{draftTone}}\",\n  \"toneDetails\": \"Hafif sert, net ve uyarıcı olsun.\",\n  \"instructions\": \"Geçiş tarihini teyit et, test için yarın saat 14:00'ü öner ve teşekkür et.\",\n  \"message\": {\n    \"itemId\": \"postman-test-1\",\n    \"subject\": \"Üretim geçiş planı\",\n    \"from\": {\n      \"name\": \"Ayşe\",\n      \"address\": \"ayse@example.com\"\n    },\n    \"to\": [\n      {\n        \"name\": \"Ali\",\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"cc\": [],\n    \"sentAt\": \"2026-09-20T09:00:00+03:00\",\n    \"body\": \"<p>Merhaba Ali,</p><p>Üretim geçiş tarihini teyit eder misin?</p>\",\n    \"bodyFormat\": \"html\"\n  }\n}",
+              "raw": "{\n  \"clientRequestId\": \"{{$guid}}\",\n  \"preferredLanguage\": \"{{preferredLanguage}}\",\n  \"tone\": \"{{draftTone}}\",\n  \"toneDetails\": \"Hafif sert, net ve uyarıcı olsun.\",\n  \"instructions\": \"Destek sürecindeki geri bildirimi yönetime aktar ve değerlendirme iste.\",\n  \"message\": {\n    \"itemId\": \"postman-test-1\",\n    \"subject\": \"Destek süreci hakkında geri bildirim\",\n    \"from\": {\n      \"name\": \"Dilek\",\n      \"address\": \"dilek@example.com\"\n    },\n    \"to\": [\n      {\n        \"name\": \"Ali\",\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"cc\": [],\n    \"sentAt\": \"2026-09-20T09:00:00+03:00\",\n    \"body\": \"<p>Merhaba, destek taleplerimizde gecikmeler yaşıyoruz. Sürecin iyileştirilmesini rica ederim.</p>\",\n    \"bodyFormat\": \"html\"\n  },\n  \"draftMode\": \"forward\",\n  \"targetAudience\": \"Grup müdürüm ve operasyon yöneticisi\",\n  \"considerations\": \"Kişisel suçlama yapma, tarih taahhüdü verme, yönetimden somut aksiyon iste.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -224,8 +245,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/mail/draft",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "mail", "draft"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mail",
+                "draft"
+              ]
             },
             "description": "Creates a reply subject and body using the selected tone, language, and backend AI provider."
           },
@@ -249,6 +277,77 @@
                   "    pm.expect(json.model).to.be.a('string').and.not.empty;",
                   "    pm.expect(json.durationMilliseconds).to.be.a('number');",
                   "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mail Questions",
+      "item": [
+        {
+          "name": "Ask Current Correspondence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/mail/questions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": {\n    \"subject\": \"Teslim tarihi\",\n    \"from\": {\n      \"address\": \"ayse@example.com\"\n    },\n    \"to\": [\n      {\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"body\": \"<p>Tarihi teyit eder misin?</p><blockquote><p>Gönderen: Ayşe</p><p>Tarih: 20 Eylül 2026</p><p>Kime: Ali</p><p>Konu: Teslim</p><p>Teslim 12 Ekim.</p></blockquote>\",\n    \"bodyFormat\": \"html\"\n  },\n  \"question\": \"Teslim tarihiyle ilgili daha önce ne söylenmiş?\",\n  \"preferredLanguage\": \"tr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Draft With Source Quotes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/mail/draft",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": {\n    \"subject\": \"Teslim tarihi\",\n    \"from\": {\n      \"address\": \"ayse@example.com\"\n    },\n    \"to\": [\n      {\n        \"address\": \"ali@example.com\"\n      }\n    ],\n    \"body\": \"<p>Tarihi teyit eder misin?</p><blockquote><p>Gönderen: Ayşe</p><p>Tarih: 20 Eylül 2026</p><p>Kime: Ali</p><p>Konu: Teslim</p><p>Teslim 12 Ekim.</p></blockquote>\",\n    \"bodyFormat\": \"html\"\n  },\n  \"instructions\": \"Tarihi teyit et.\",\n  \"tone\": \"professional\",\n  \"preferredLanguage\": \"tr\",\n  \"sourceQuotes\": [\n    \"Teslim 12 Ekim.\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
                 ]
               }
             }

@@ -15,8 +15,11 @@ public sealed class ProjectDependencyTests
                 ["OutlookMailAdviser.Application", "OutlookMailAdviser.Domain"],
             ["OutlookMailAdviser.Adapters.MailContent"] =
                 ["OutlookMailAdviser.Application", "OutlookMailAdviser.Domain"],
+            ["OutlookMailAdviser.Adapters.ActionNotes"] =
+                ["OutlookMailAdviser.Application", "OutlookMailAdviser.Domain"],
             ["OutlookMailAdviser.Api"] =
             [
+                "OutlookMailAdviser.Adapters.ActionNotes",
                 "OutlookMailAdviser.Adapters.MailContent",
                 "OutlookMailAdviser.Adapters.Ollama",
                 "OutlookMailAdviser.Adapters.OpenAI",

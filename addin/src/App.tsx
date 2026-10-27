@@ -1,3 +1,5 @@
+import { ActionNotes } from "./components/ActionNotes";
+import type { NewActionNote } from "./types";
 import { LanguageProvider, useLanguage, readPreference, savePreference } from "./i18n/LanguageContext";
 import { errorText, UiError } from "./i18n/messages";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -28,6 +30,9 @@ export default function App() {
 
 function MailAdviser() {
   const { language, setLanguage, t, number } = useLanguage();
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [noteSelection, setNoteSelection] = useState<NewActionNote | null>(null);
+  const clearNoteSelection = useCallback(() => setNoteSelection(null), []);
   const itemVersion = useRef(0);
   const statusRequest = useRef<AbortController | null>(null);
   const [draftOpened, setDraftOpened] = useState(false);
@@ -204,6 +209,16 @@ function MailAdviser() {
         </div>
       </header>
 
+      <label className="language-field">
+        <span>{t("uiLanguage")}</span>
+        <select value={language} onChange={event => setLanguage(event.target.value as OutputLanguage)}>
+          <option value="tr">Türkçe</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+
+      <ActionNotes open={notesOpen} onOpenChange={setNotesOpen} selection={noteSelection} onSelectionClear={clearNoteSelection} />
+      <div className="mail-workspace" hidden={notesOpen}>
       <div className={`status ${status.state}`} role="status" aria-live="polite">
         <span className="status-dot" aria-hidden="true" />
         <span className="status-message">
@@ -225,13 +240,7 @@ function MailAdviser() {
         </section>
       )}
 
-      <label className="language-field">
-        <span>{t("uiLanguage")}</span>
-        <select value={language} onChange={event => setLanguage(event.target.value as OutputLanguage)}>
-          <option value="tr">Türkçe</option>
-          <option value="en">English</option>
-        </select>
-      </label>
+
 
       <label className="language-field">
         <span>{t("outputLanguage")}</span>
@@ -256,7 +265,11 @@ function MailAdviser() {
 
       {loading && <div className="progress" role="progressbar" aria-label={t("analyzing")}><span /></div>}
       {error != null && <div className="error" role="alert">{errorText(error, t)}</div>}
-      {result && <AnalysisResult result={result} />}
+      {result && <AnalysisResult result={result} onTrackAction={action => {
+        setNoteSelection({ id: crypto.randomUUID(), mailSubject: message?.subject || "", description: action.description,
+          owner: action.owner, dueDate: action.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(action.dueDate) ? action.dueDate : null });
+        setNotesOpen(true);
+      }} />}
 
       {message && <MailQuestions message={message} language={outputLanguage} useSourcesDisabled={drafting || loading} onUseSources={quotes => {
         setDraftOpened(true);
@@ -380,6 +393,7 @@ function MailAdviser() {
       )}
 
       <footer>{t("privacy")}</footer>
+      </div>
     </main>
   );
 }

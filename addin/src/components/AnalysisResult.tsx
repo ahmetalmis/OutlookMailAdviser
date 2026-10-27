@@ -1,10 +1,11 @@
 import { useLanguage } from "../i18n/LanguageContext";
 import { tr, en, type Translate } from "../i18n/messages";
-import type { AnalyzeMailResponse } from "../types";
+import type { AnalyzeMailResponse, MailAction } from "../types";
 import { ContentProcessingNotice } from "./ContentProcessingNotice";
 
 interface Props {
   result: AnalyzeMailResponse;
+  onTrackAction?: (action: MailAction) => void;
 }
 
 function label(value: string, t: Translate): string {
@@ -19,7 +20,7 @@ function label(value: string, t: Translate): string {
   return labels[value.toLowerCase()] ?? value;
 }
 
-export function AnalysisResult({ result }: Props) {
+export function AnalysisResult({ result, onTrackAction }: Props) {
   const { t, number } = useLanguage();
   const warnings = result.warnings.filter(warning => !result.contentProcessing ||
     ![tr.contentOmitted, en.contentOmitted,
@@ -60,6 +61,7 @@ export function AnalysisResult({ result }: Props) {
                     <span className="action-mine-badge">{t("assignedToYou")}</span>
                   )}
                 </div>
+                {onTrackAction && <button className="track-action-button" type="button" onClick={() => onTrackAction(action)}>{t("trackAction")}</button>}
                 <span className="action-meta">
                   {[action.owner, action.dueDate].filter(Boolean).join(" · ") || t("ownerUnknown")}
                 </span>

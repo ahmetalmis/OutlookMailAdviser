@@ -24,3 +24,7 @@ logs/
 *.tsbuildinfo
 output/
 tmp/
+
+# Local action-note data must never be committed.
+**/action-notes.json
+**/.action-notes-*.tmp

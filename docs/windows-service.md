@@ -65,3 +65,19 @@ when sharing diagnostics.
 References:
 - https://learn.microsoft.com/en-us/office/dev/add-ins/testing/runtime-logging
 - https://learn.microsoft.com/en-us/office/dev/add-ins/testing/debug-add-ins-using-devtools-edge-chromium
+
+## Action-note data preservation
+
+The action tracker stores `data/action-notes.json` below the installation directory. Administrators and
+SYSTEM have full control; LocalService can modify only the data directory while the application binaries
+retain their existing read/execute permissions. Notes do not depend on Outlook browser cache or AI access.
+
+Install and update scripts initialize these permissions. The updater rejects packages containing a `data`
+or `.rollback` directory, or any action-note data files. After stopping the service it copies the store to
+`.rollback/<timestamp>/data/action-notes.json` before replacing binaries. Rollback restores that snapshot.
+Publishing excludes the API project's `data` directory. Never copy a live data file into a release package.
+
+For a manual backup or restore, stop the service first, copy the data file, and then start the service.
+Keep backups private: they contain saved email subjects, actions and owner names. An unreadable, corrupt
+or unsupported data file produces `action_note_storage_error`; it is not overwritten with an empty list.
+Development uses the repository's `.artifacts/action-data` directory instead of the service data folder.

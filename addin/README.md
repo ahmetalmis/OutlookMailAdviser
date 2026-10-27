@@ -137,3 +137,26 @@ An activity indicator appears during processing; the result shows the number of 
 ## Translation maintenance
 
 Panel strings are defined in `src/i18n/messages.ts`; English keys are checked against the Turkish dictionary by TypeScript. `LanguageContext` handles detection, persistence and locale-aware formatting. Keep UI messages as codes until rendering so an interface-language change updates existing notices. Keep `preferredLanguage` exclusively for model output. Localize ribbon descriptions and strings in all three manifests together; the standard and localhost manifests must remain identical.
+
+
+## Local action tracking
+
+After analyzing an email, choose **Track action** next to an action. Review or edit the email subject,
+action text, owner and optional due date, then choose **Save**. A missing owner is allowed and appears
+as **Owner not specified**. Only the saved note fields are retained; the email body is not stored.
+
+The **My actions** button at the top of the panel shows the active count and opens saved actions from
+all emails. Search by subject/action, filter by owner, or edit a note. **Mark completed** moves a note
+out of the active list; use the **Completed** view and **Reopen** to bring it back. Returning to the
+email preserves the current analysis and draft fields. There are no automatic notifications or messages;
+use the list to give reminders yourself during meetings.
+
+Notes are stored on this computer, independently of browser storage and the AI provider. The Windows
+service uses `C:\ProgramData\OutlookMailAdviser\data\action-notes.json`; development uses
+`.artifacts/action-data/action-notes.json` in the repository. These files contain saved email subjects
+and action details: keep them private. Service updates preserve the data folder and back up the store
+while the service is stopped. To back up manually, stop the service before copying the file.
+
+This is a single-user local list, separate from Outlook Notes, Outlook Tasks and Microsoft To Do.
+It does not synchronize across devices. Both English and Turkish interfaces are supported; saved
+note content keeps the language you entered. See the [Windows service guide](../docs/windows-service.md) for update details.

@@ -245,3 +245,28 @@ footer { margin-top: auto; padding-top: 8px; color: #94a3b8; font-size: 10px; li
   main { padding: 12px; }
   .mail-questions { padding: 14px; }
 }
+
+.mail-workspace { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.mail-workspace[hidden] { display: none; }
+.action-navigation button, .note-buttons button, .track-action-button, .action-notes-view > button {
+  border: 1px solid #0f766e; background: #fff; color: #0f766e; border-radius: 8px;
+  padding: 8px 10px; font: inherit; font-size: 12px; cursor: pointer; white-space: normal;
+}
+.action-navigation button { width: 100%; font-weight: 700; }
+.note-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.note-buttons [aria-pressed="true"] { color: white; background: #0f766e; }
+.action-tracker button:disabled { opacity: .6; cursor: not-allowed; }
+.action-notes-view, .action-note-editor { display: flex; flex-direction: column; gap: 12px; }
+.action-note-editor, .action-note-card { border: 1px solid #dbe4f0; border-radius: 12px; padding: 14px; background: #fff; overflow-wrap: anywhere; }
+.action-note-editor h3, .action-note-card h3 { margin: 0; font-size: 14px; }
+.notes-help, .action-note-card p { font-size: 12px; line-height: 1.5; }
+.action-note-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.note-description { white-space: pre-wrap; }
+.track-action-button { margin-top: 6px; }
+@media (prefers-color-scheme: dark) {
+  .action-note-editor, .action-note-card { background: #0f1c2f; border-color: #334155; }
+  .action-navigation button, .note-buttons button, .track-action-button, .action-notes-view > button { background: #0f1c2f; color: #5eead4; border-color: #5eead4; }
+  .note-buttons [aria-pressed="true"] { background: #0f766e; color: #fff; }
+}
+
+.action-note-card { display: flex; flex-direction: column; gap: 8px; }

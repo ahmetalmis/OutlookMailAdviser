@@ -1,3 +1,6 @@
+using OutlookMailAdviser.Adapters.ActionNotes;
+using OutlookMailAdviser.Application.ActionNotes;
+using OutlookMailAdviser.Api.Features.ActionNotes;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -50,6 +53,12 @@ builder.Services.AddScoped<IAnalyzeMailUseCase, AnalyzeMailHandler>();
 builder.Services.AddScoped<IDraftMailUseCase, DraftMailHandler>();
 builder.Services.AddScoped<IAskMailQuestionUseCase, MailQuestionHandler>();
 builder.Services.AddMailContentAdapter(builder.Configuration);
+var defaultDataDirectory = builder.Environment.IsDevelopment()
+    ? Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "../../../.artifacts/action-data"))
+    : Path.Combine(builder.Environment.ContentRootPath, "data");
+builder.Services.AddSingleton<IActionNoteRepository>(_ => new JsonActionNoteRepository(
+    defaultDataDirectory));
+builder.Services.AddScoped<ActionNoteService>();
 
 var aiProvider = builder.Configuration["Ai:Provider"]?.Trim();
 if (string.Equals(aiProvider, "Ollama", StringComparison.OrdinalIgnoreCase))
@@ -131,6 +140,7 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
     ResponseWriter = ReadinessResponseWriter.WriteAsync
 });
 
+app.MapActionNoteEndpoints();
 app.MapMailAnalysisEndpoints();
 app.MapMailDraftingEndpoints();
 app.MapMailQuestionEndpoints();

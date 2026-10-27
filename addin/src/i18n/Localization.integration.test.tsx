@@ -1,3 +1,4 @@
+import { createActionNote, listActionNotes } from "../api/actionNotesApi";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -11,7 +12,7 @@ import type { AnalyzeMailResponse, MailMessage } from "../types";
 vi.mock("../office/outlookItemReader", () => ({ readCurrentMessage: vi.fn(), createAnalysisRequest: vi.fn(), registerItemChanged: vi.fn() }));
 vi.mock("../api/mailAnalysisApi", () => ({ analyzeMail: vi.fn(), askMailQuestion: vi.fn(), draftMail: vi.fn(), getApiStatus: vi.fn() }));
 const message: MailMessage = { itemId: "one", subject: "Original subject", from: { name: "Sender", address: "a@b.com" }, to: [{ name: null, address: "b@b.com" }], cc: [], sentAt: null, body: "Original quote", bodyFormat: "plainText" };
-const analysis: AnalyzeMailResponse = { clientRequestId: "id", summary: "Original summary", actionRequired: true, actionRequiredFromCurrentUser: true, actions: [], priority: "high", sentiment: "neutral", warnings: ["Original model warning", en.contentOmitted, tr.contentOmitted], model: "test", durationMilliseconds: 1200, wasTruncated: true, contentProcessing: { originalCharacters: 6000, includedCharacters: 5000, includedHistoryMessages: 2, historyLimited: true, currentMessageTruncated: true, parsingUncertain: true } };
+const analysis: AnalyzeMailResponse = { clientRequestId: "id", summary: "Original summary", actionRequired: true, actionRequiredFromCurrentUser: true, actions: [{ description: "Confirm delivery", owner: "Alex", dueDate: "2026-11-02", confidence: 0.9, assignedToCurrentUser: false }], priority: "high", sentiment: "neutral", warnings: ["Original model warning", en.contentOmitted, tr.contentOmitted], model: "test", durationMilliseconds: 1200, wasTruncated: true, contentProcessing: { originalCharacters: 6000, includedCharacters: 5000, includedHistoryMessages: 2, historyLimited: true, currentMessageTruncated: true, parsingUncertain: true } };
 let root: Root; let container: HTMLDivElement;
 beforeEach(() => {
   vi.clearAllMocks(); localStorage.clear(); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -86,4 +87,24 @@ it("updates an in-flight question's controls without cancelling it, then transla
   await change(container.querySelector<HTMLSelectElement>(".language-field select")!, "tr"); expect(container.textContent).toContain(tr.cancelled);
   await act(async () => finish({ answer: "Late answer", sources: [], completedChunks: 1, totalChunks: 1, isPartial: false, warnings: [] }));
   expect(container.textContent).not.toContain("Late answer");
+});
+
+vi.mock("../api/actionNotesApi", () => ({ listActionNotes: vi.fn(async () => []), createActionNote: vi.fn(), editActionNote: vi.fn(), completeActionNote: vi.fn() }));
+
+it("tracks the selected action and returns to the same analysis and draft fields", async () => {
+  localStorage.setItem(UI_LANGUAGE_KEY, "tr");
+  vi.mocked(listActionNotes).mockResolvedValue([]);
+  vi.mocked(createActionNote).mockImplementation(async note => ({ ...note, createdAt: "2026-10-27T10:00:00Z", updatedAt: "2026-10-27T10:00:00Z", completedAt: null, isCompleted: false }));
+  await act(async () => root.render(<App />));
+  await click(tr.analyze);
+  await change(container.querySelector<HTMLTextAreaElement>(".draft-composer textarea")!, "Keep my draft instructions");
+  await click(tr.trackAction);
+  expect(container.querySelector(".mail-workspace")!.hasAttribute("hidden")).toBe(true);
+  expect(container.querySelector<HTMLInputElement>(".action-note-editor input")!.value).toBe(message.subject);
+  await click(tr.saveNote);
+  expect(createActionNote).toHaveBeenCalledWith(expect.objectContaining({ mailSubject: message.subject, description: "Confirm delivery", owner: "Alex", dueDate: "2026-11-02" }));
+  await click(tr.backToEmail);
+  expect(container.querySelector(".mail-workspace")!.hasAttribute("hidden")).toBe(false);
+  expect(container.querySelector(".summary")!.textContent).toBe(analysis.summary);
+  expect(container.querySelector<HTMLTextAreaElement>(".draft-composer textarea")!.value).toBe("Keep my draft instructions");
 });

@@ -169,3 +169,5 @@ it("validates the forward audience, sends separate constraints, and resets them 
     container.remove();
   }
 });
+
+vi.mock("./api/actionNotesApi", () => ({ listActionNotes: vi.fn(async () => []), createActionNote: vi.fn(), editActionNote: vi.fn(), completeActionNote: vi.fn() }));

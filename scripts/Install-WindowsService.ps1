@@ -2,6 +2,7 @@
 param([string]$PackagePath = (Join-Path $PSScriptRoot '../.artifacts/windows-service'))
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Initialize-ActionNoteData.ps1')
 $serviceName = 'OutlookMailAdviser'
 $taskName = 'Outlook Mail Adviser'
 $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
@@ -10,6 +11,7 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 }
 $packageRoot = (Resolve-Path -LiteralPath $PackagePath).Path
 if (-not (Test-Path (Join-Path $packageRoot 'OutlookMailAdviser.Api.exe'))) { throw 'Publish the service package first.' }
+Assert-NoActionNoteDataInPackage -PackageRoot $packageRoot
 if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) { throw 'The service already exists. Stop and update it explicitly.' }
 $installRoot = Join-Path $env:ProgramData 'OutlookMailAdviser'
 if (Test-Path $installRoot) { throw "Installation directory already exists: $installRoot" }
@@ -25,6 +27,7 @@ foreach ($entry in @(@('S-1-5-18','FullControl'), @('S-1-5-32-544','FullControl'
 }
 Set-Acl -LiteralPath $installRoot -AclObject $acl
 Copy-Item -Path (Join-Path $packageRoot '*') -Destination $installRoot -Recurse
+Initialize-ActionNoteDataDirectory -InstallRoot $installRoot
 
 # A dedicated server certificate avoids depending on an interactive user's dev certificate.
 $certificate = New-SelfSignedCertificate -DnsName 'localhost' -CertStoreLocation 'Cert:\LocalMachine\My' `

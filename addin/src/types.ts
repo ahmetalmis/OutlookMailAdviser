@@ -104,3 +104,18 @@ export interface MailQuestionResponse {
   isPartial: boolean;
   warnings: string[];
 }
+
+export interface ActionNoteInput {
+  mailSubject: string;
+  description: string;
+  owner: string | null;
+  dueDate: string | null;
+}
+export interface ActionNote extends ActionNoteInput {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  isCompleted: boolean;
+}
+export interface NewActionNote extends ActionNoteInput { id: string; }

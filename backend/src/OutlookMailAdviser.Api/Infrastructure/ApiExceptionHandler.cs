@@ -1,3 +1,4 @@
+using OutlookMailAdviser.Application.ActionNotes;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OutlookMailAdviser.Application.MailAnalysis.Exceptions;
@@ -49,6 +50,9 @@ internal sealed partial class ApiExceptionHandler(
 
     private static ApiError MapException(Exception exception) => exception switch
     {
+        ActionNoteNotFoundException => new ApiError(404, "action_note_not_found", "Action note not found.", "The action note was not found."),
+        ActionNoteConflictException => new ApiError(409, "action_note_conflict", "Action note conflict.", "This ID already belongs to a different action note."),
+        ActionNoteStorageException => new ApiError(503, "action_note_storage_error", "Action notes unavailable.", "The local action note store could not be read or written."),
         ApiValidationException or ArgumentException or BadHttpRequestException => new ApiError(
             StatusCodes.Status400BadRequest,
             "invalid_request",

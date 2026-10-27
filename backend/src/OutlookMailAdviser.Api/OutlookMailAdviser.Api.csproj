@@ -5,10 +5,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../OutlookMailAdviser.Adapters.ActionNotes/OutlookMailAdviser.Adapters.ActionNotes.csproj" />
     <ProjectReference Include="../OutlookMailAdviser.Application/OutlookMailAdviser.Application.csproj" />
     <ProjectReference Include="../OutlookMailAdviser.Adapters.MailContent/OutlookMailAdviser.Adapters.MailContent.csproj" />
     <ProjectReference Include="../OutlookMailAdviser.Adapters.Ollama/OutlookMailAdviser.Adapters.Ollama.csproj" />
     <ProjectReference Include="../OutlookMailAdviser.Adapters.OpenAI/OutlookMailAdviser.Adapters.OpenAI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="data/**" />
+    <None Remove="data/**" />
+  </ItemGroup>
 </Project>

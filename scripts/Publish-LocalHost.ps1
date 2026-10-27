@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Initialize-ActionNoteData.ps1")
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $addinRoot = Join-Path $repositoryRoot "addin"
 $apiProject = Join-Path $repositoryRoot "backend/src/OutlookMailAdviser.Api/OutlookMailAdviser.Api.csproj"
@@ -53,4 +54,5 @@ Copy-Item -LiteralPath (Join-Path $addinRoot "manifest.localhost.xml") `
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "Start-LocalHost.ps1") `
     -Destination (Join-Path $outputRoot "Start-LocalHost.ps1") -Force
 
+Assert-NoActionNoteDataInPackage -PackageRoot $outputRoot
 Write-Host "Local host package created at: $outputRoot"

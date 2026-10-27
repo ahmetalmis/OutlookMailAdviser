@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param([Parameter(Mandatory)][string]$PackagePath)
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Initialize-ActionNoteData.ps1')
 $serviceName = 'OutlookMailAdviser'
 $installRoot = Join-Path $env:ProgramData 'OutlookMailAdviser'
 $packageRoot = (Resolve-Path -LiteralPath $PackagePath).Path
@@ -12,6 +13,7 @@ if (-not $service -or -not $service.PathName.StartsWith(('"' + $expectedExe + '"
 foreach ($required in @('OutlookMailAdviser.Api.exe', 'wwwroot/addin/index.html')) {
     if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $required))) { throw "Missing package file: $required" }
 }
+Assert-NoActionNoteDataInPackage -PackageRoot $packageRoot
 $files = @(Get-ChildItem -LiteralPath $packageRoot -Recurse -File)
 if ($files | Where-Object { $_.Name -eq 'appsettings.WindowsService.json' -or $_.Extension -in '.pfx','.p12','.key' }) {
     throw 'Deployment packages must not contain service credentials or private certificates.'
@@ -29,6 +31,14 @@ foreach ($file in $files) {
 }
 try {
     Stop-Service $serviceName
+    # Snapshot the store only while the service is stopped, before replacing any binaries.
+    $notesPath = Join-Path $installRoot 'data/action-notes.json'
+    if (Test-Path -LiteralPath $notesPath) {
+        $dataBackup = Join-Path $backup 'data'
+        New-Item -ItemType Directory -Path $dataBackup -Force | Out-Null
+        Copy-Item -LiteralPath $notesPath -Destination (Join-Path $dataBackup 'action-notes.json')
+    }
+    Initialize-ActionNoteDataDirectory -InstallRoot $installRoot
     foreach ($file in $files) {
         $target = Join-Path $installRoot ([IO.Path]::GetRelativePath($packageRoot, $file.FullName))
         New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force | Out-Null

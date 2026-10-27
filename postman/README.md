@@ -96,3 +96,19 @@ Add the following optional fields to the existing `POST /api/v1/mail/draft` requ
 If `draftMode` is omitted, `reply` is used. `forward` requires `targetAudience` (up to 500 characters); `considerations` is optional (up to 2,000 characters). Send these fields with the existing `message`, `tone` and `instructions` fields. The response schema is unchanged; no email is automatically forwarded or sent.
 
 The environment language variable sets `preferredLanguage` for model output (`tr` or `en`). The Outlook panel's interface language is a separate local preference and does not change the HTTP API contract.
+
+## Local action-note API
+
+These endpoints use the local backend and do not call the AI provider:
+
+- `GET /api/v1/action-notes` returns all notes, including completed notes, newest first.
+- `POST /api/v1/action-notes` saves `{ "id": "<client-generated UUID>", "mailSubject": "...", "description": "...", "owner": null, "dueDate": "2026-11-02" }`.
+- `PUT /api/v1/action-notes/{id}` edits the same fields except `id`, preserving completion state.
+- `PATCH /api/v1/action-notes/{id}/completion` accepts `{ "completed": true }` or `{ "completed": false }`.
+
+Successful operations return HTTP 200. Reusing an ID with the same fields returns the existing note;
+reusing it with different fields returns 409. Empty subject/action fields return 400; missing notes return
+404. Local storage failures return 503 with `action_note_storage_error`; invalid stores are never silently
+reset. Responses include `createdAt`, `updatedAt`, nullable `completedAt` and `isCompleted`. `owner` and
+`dueDate` are optional; dates use `YYYY-MM-DD`. Subject and owner are limited to 1,000 characters each,
+and action text to 8,000 characters. Do not include email bodies in these requests.

@@ -48,6 +48,29 @@ public sealed class AnalyzeMailHandlerTests
         Assert.Equal("qwen3.5:4b", result.Model);
     }
 
+    [Theory]
+    [InlineData("tr", "İçeriğin bir bölümü analize dahil edilemedi.")]
+    [InlineData("tr-TR", "İçeriğin bir bölümü analize dahil edilemedi.")]
+    [InlineData("en", "Some content could not be included in the analysis.")]
+    [InlineData("en-US", "Some content could not be included in the analysis.")]
+    public async Task ExecuteAsyncLocalizesProcessingWarningsWithoutChangingModelWarnings(
+        string language, string expectedWarning)
+    {
+        var sanitizer = new StubSanitizer(new SanitizedConversation(
+            "Subject", "sender@example.com", ["recipient@example.com"], [], null,
+            "Clean body", true, ["İçeriğin bir bölümü analize dahil edilemedi."]));
+        var gateway = new StubGateway(new MailIntelligenceResult(
+            new DomainMailAnalysis("Summary", false, [], PriorityLevel.Low,
+                MailSentiment.Neutral, ["Original model warning"]), "test", 10));
+        var handler = new AnalyzeMailHandler(sanitizer, gateway);
+
+        var result = await handler.ExecuteAsync(
+            new AnalyzeMailCommand(CreateConversation(), language), CancellationToken.None);
+
+        Assert.Equal([expectedWarning, "Original model warning"], result.Analysis.Warnings);
+        Assert.Equal(language, gateway.ReceivedOptions?.PreferredLanguage);
+    }
+
     private static MailConversation CreateConversation() =>
         new([
             new MailMessage(

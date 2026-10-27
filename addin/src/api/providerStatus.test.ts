@@ -33,3 +33,9 @@ it("supports a previous plain-text health endpoint during an update", async () =
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Healthy")));
   expect((await getApiStatus()).state).toBe("healthy");
 });
+
+it.each([analyzeMail, draftMail, askMailQuestion])("carries a stable connectivity code for every mail operation", async operation => {
+  vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("PRIVATE_NETWORK_DETAIL")));
+  const request = {} as AnalyzeMailRequest & DraftMailRequest & MailMessage;
+  await expect(operation(request, undefined as never, undefined as never)).rejects.toMatchObject({ code: "local_unavailable", status: 0 });
+});

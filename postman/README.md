@@ -81,16 +81,18 @@ history. A 200 response can be partial: inspect `isPartial`, `completedChunks`, 
 `warnings` before interpreting absence of evidence. **Draft With Source Quotes** demonstrates the
 optional `sourceQuotes` array; changing a quote to text absent from the body returns 400.
 
-### Muhataba göre taslak
+### Audience-specific drafts
 
-`POST /api/v1/mail/draft` için mevcut alanlara aşağıdakiler eklenebilir:
+Add the following optional fields to the existing `POST /api/v1/mail/draft` request:
 
 ```json
 {
   "draftMode": "forward",
-  "targetAudience": "Grup müdürüm ve operasyon yöneticisi",
-  "considerations": "Kişisel suçlama yapma, tarih taahhüdü verme."
+  "targetAudience": "My department head and operations manager",
+  "considerations": "Avoid personal blame and date commitments."
 }
 ```
 
-`draftMode` gönderilmezse `reply` kullanılır. `forward` için `targetAudience` zorunludur (500 karakter); `considerations` isteğe bağlıdır (2000 karakter). Bu alanları mevcut `message`, `tone` ve `instructions` alanlarıyla birlikte gönderin. Yanıt şeması değişmez; otomatik iletme veya gönderim yapılmaz.
+If `draftMode` is omitted, `reply` is used. `forward` requires `targetAudience` (up to 500 characters); `considerations` is optional (up to 2,000 characters). Send these fields with the existing `message`, `tone` and `instructions` fields. The response schema is unchanged; no email is automatically forwarded or sent.
+
+The environment language variable sets `preferredLanguage` for model output (`tr` or `en`). The Outlook panel's interface language is a separate local preference and does not change the HTTP API contract.

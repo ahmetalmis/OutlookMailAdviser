@@ -1,6 +1,7 @@
+import { useLanguage } from "../i18n/LanguageContext";
+import { errorText, UiError } from "../i18n/messages";
 import { useEffect, useRef, useState } from "react";
 import { askMailQuestion } from "../api/mailAnalysisApi";
-import { providerErrorMessage } from "../api/providerErrors";
 import type { MailMessage, MailQuestionResponse } from "../types";
 
 interface Props {
@@ -11,11 +12,12 @@ interface Props {
 }
 
 export function MailQuestions({ message, language, onUseSources, useSourcesDisabled = false }: Props) {
+  const { t, number } = useLanguage();
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState<MailQuestionResponse | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const pending = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function MailQuestions({ message, language, onUseSources, useSourcesDisab
       if (pending.current === controller && !controller.signal.aborted) { setResult(response); }
     } catch (reason) {
       if (pending.current === controller && !controller.signal.aborted) {
-        setError(reason instanceof Error ? reason.message : "Soru yanıtlanamadı.");
+        setError(reason ?? new UiError("questionFailed"));
       }
     } finally {
       if (pending.current === controller) { setBusy(false); pending.current = null; }
@@ -52,47 +54,47 @@ export function MailQuestions({ message, language, onUseSources, useSourcesDisab
     pending.current?.abort();
     pending.current = null;
     setBusy(false);
-    setError("İnceleme iptal edildi.");
+    setError(new UiError("cancelled"));
   }
 
   const quotes = result?.sources.filter(source => selected.includes(source.id)).map(source => source.quote) ?? [];
   const size = quotes.reduce((total, quote) => total + quote.length, 0);
   return <section className="mail-questions">
-    <h2>Bu yazışmaya sor</h2>
-    <p>Yalnızca açık e-postanın gövdesi ve içindeki geçmiş yazışmalar incelenir.</p>
+    <h2>{t("askTitle")}</h2>
+    <p>{t("askHelp")}</p>
     <label className="draft-field">
-      <span>Sorun</span>
+      <span>{t("question")}</span>
       <textarea value={question} onChange={event => setQuestion(event.target.value)}
         maxLength={1000} rows={3} disabled={busy}
-        placeholder="Örn. Teslim tarihiyle ilgili daha önce ne söylenmiş?" />
+        placeholder={t("questionExample")} />
     </label>
     <button type="button" onClick={() => void ask()} disabled={busy || !question.trim()}>
-      {busy ? "Yazışma inceleniyor…" : "Sor"}
+      {busy ? t("examining") : t("ask")}
     </button>
     {busy && <>
-      <div className="progress" role="progressbar" aria-label="Yazışma inceleniyor"><span /></div>
-      <p role="status">Geçmişin tamamı bölümler halinde inceleniyor. Uzun yazışmalar zaman alabilir.</p>
-      <button type="button" onClick={cancel}>İptal et</button>
+      <div className="progress" role="progressbar" aria-label={t("examiningLabel")}><span /></div>
+      <p role="status">{t("examiningHelp")}</p>
+      <button type="button" onClick={cancel}>{t("cancel")}</button>
     </>}
-    {error && <p className="error" role="alert">{error}</p>}
+    {error != null && <p className="error" role="alert">{errorText(error, t)}</p>}
     {result && <div aria-live="polite">
-      {result.errorCode && <p className="error" role="alert">{providerErrorMessage(result.errorCode, "AI sağlayıcısı isteği tamamlayamadı.")}</p>}
+      {result.errorCode && <p className="error" role="alert">{errorText({ code: result.errorCode }, t)}</p>}
       <p className="question-answer">{result.answer}</p>
-      <small>{result.completedChunks}/{result.totalChunks} bölüm incelendi{result.isPartial ? " · Kısmi sonuç" : ""}</small>
+      <small>{t("coverage", { completed: number(result.completedChunks), total: number(result.totalChunks) })}{result.isPartial ? ` · ${t("partial")}` : ""}</small>
       {result.warnings.map(warning => <p className="question-warning" key={warning}>{warning}</p>)}
       {result.sources.length > 0 && <>
-        <h3>Kaynak alıntıları</h3>
-        <p>Taslakta kullanmak istediğin alıntıları seç.</p>
+        <h3>{t("sources")}</h3>
+        <p>{t("selectSources")}</p>
         {result.sources.map((source, index) => <label className="question-source" key={source.id}>
           <input type="checkbox" checked={selected.includes(source.id)}
             onChange={event => setSelected(current => event.target.checked
               ? [...current, source.id] : current.filter(id => id !== source.id))} />
-          <span><strong>Alıntı {index + 1}</strong><blockquote>{source.quote}</blockquote></span>
+          <span><strong>{t("quote")} {number(index + 1)}</strong><blockquote>{source.quote}</blockquote></span>
         </label>)}
-        <small>Seçilen kaynaklar: {size}/4000 karakter</small>
-        {(size > 4000 || quotes.length > 20) && <p role="alert">En fazla 20 alıntı ve 4000 karakter seçebilirsin.</p>}
+        <small>{t("sourceSize", { count: number(size) })}</small>
+        {(size > 4000 || quotes.length > 20) && <p role="alert">{t("sourceLimit")}</p>}
         <button type="button" disabled={useSourcesDisabled || quotes.length === 0 || size > 4000 || quotes.length > 20}
-          onClick={() => onUseSources(quotes)}>Taslakta kullan</button>
+          onClick={() => onUseSources(quotes)}>{t("useSources")}</button>
       </>}
     </div>}
   </section>;

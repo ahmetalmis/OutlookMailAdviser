@@ -1,9 +1,11 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
 import { draftMail, getApiStatus } from "./api/mailAnalysisApi";
 import { createAnalysisRequest, registerItemChanged } from "./office/outlookItemReader";
+
+beforeEach(() => localStorage.setItem("mail-adviser.ui-language", "tr"));
 
 vi.mock("./office/outlookItemReader", () => {
   const message = { itemId: "one", subject: "Test", from: { name: null, address: "a@b.com" },

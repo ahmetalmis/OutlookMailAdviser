@@ -235,3 +235,13 @@ footer { margin-top: auto; padding-top: 8px; color: #94a3b8; font-size: 10px; li
 .question-source blockquote { margin: 8px 0; padding-left: 12px; border-left: 3px solid #4c71a1; }
 .question-warning { padding: 10px; background: #fff4d5; border-radius: 6px; }
 .selected-sources { padding: 12px; background: #eef4fc; border-radius: 8px; }
+
+/* Keep translated labels and source content inside narrow Outlook panes. */
+.app-header > div, .result-heading h2, .action-title > strong, .question-source > span { min-width: 0; }
+.mail-card, .result, .draft-composer, .selected-sources { overflow-wrap: anywhere; }
+.result-heading, .action-title, .draft-result-heading { flex-wrap: wrap; }
+.logo { flex-shrink: 0; }
+@media (max-width: 360px) {
+  main { padding: 12px; }
+  .mail-questions { padding: 14px; }
+}

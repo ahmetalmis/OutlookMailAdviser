@@ -24,6 +24,10 @@ public sealed class AnalyzeMailHandler(
             cancellationToken);
 
         var combinedWarnings = sanitizedConversation.Warnings
+            .Select(warning => warning == "İçeriğin bir bölümü analize dahil edilemedi."
+                && !preferredLanguage.StartsWith("tr", StringComparison.OrdinalIgnoreCase)
+                    ? "Some content could not be included in the analysis."
+                    : warning)
             .Concat(intelligenceResult.Analysis.Warnings)
             .Distinct(StringComparer.Ordinal)
             .ToArray();

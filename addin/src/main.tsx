@@ -1,3 +1,4 @@
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -8,11 +9,16 @@ if (!root) {
   throw new Error("Application root element was not found.");
 }
 
+function OutlookRequired() {
+  const { t } = useLanguage();
+  return <main><div className="error">{t("outlookRequired")}</div></main>;
+}
+
 Office.onReady((info) => {
   if (info.host !== Office.HostType.Outlook) {
     ReactDOM.createRoot(root).render(
       <React.StrictMode>
-        <main><div className="error">Bu uygulama Outlook içinde çalıştırılmalıdır.</div></main>
+        <LanguageProvider><OutlookRequired /></LanguageProvider>
       </React.StrictMode>,
     );
     return;

@@ -1,3 +1,4 @@
+import { UiError } from "../i18n/messages";
 import type { AnalyzeMailRequest, MailMessage, MailParticipant } from "../types";
 
 function participant(details: Office.EmailAddressDetails): MailParticipant {
@@ -15,7 +16,7 @@ function readBody(item: Office.MessageRead): Promise<string> {
         return;
       }
 
-      reject(new Error(result.error?.message ?? "E-posta gövdesi okunamadı."));
+      reject(new UiError("bodyReadFailed"));
     });
   });
 }
@@ -27,21 +28,21 @@ function isMessageRead(item: Office.Item | undefined): item is Office.MessageRea
 export async function readCurrentMessage(): Promise<MailMessage> {
   const item = Office.context.mailbox.item;
   if (!isMessageRead(item)) {
-    throw new Error("Lütfen okuma modunda bir e-posta açın.");
+    throw new UiError("openEmail");
   }
 
   if (!item.from?.emailAddress) {
-    throw new Error("Gönderen bilgisi okunamadı.");
+    throw new UiError("senderMissing");
   }
 
   const recipients = item.to ?? [];
   if (recipients.length === 0) {
-    throw new Error("Alıcı bilgisi okunamadı.");
+    throw new UiError("recipientsMissing");
   }
 
   return {
     itemId: item.itemId ?? null,
-    subject: item.subject ?? "(Konu yok)",
+    subject: item.subject ?? "",
     from: participant(item.from),
     to: recipients.map(participant),
     cc: (item.cc ?? []).map(participant),

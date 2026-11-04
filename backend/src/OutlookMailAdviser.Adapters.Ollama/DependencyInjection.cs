@@ -6,6 +6,7 @@ using OutlookMailAdviser.Adapters.Ollama.Configuration;
 using OutlookMailAdviser.Adapters.Ollama.Health;
 using OutlookMailAdviser.Application.MailAnalysis.Ports;
 using OutlookMailAdviser.Application.MailDrafting.Ports;
+using OutlookMailAdviser.Application.MailboxTriage.Ports;
 
 namespace OutlookMailAdviser.Adapters.Ollama;
 
@@ -33,10 +34,13 @@ public static class DependencyInjection
                 client.Timeout = Timeout.InfiniteTimeSpan);
         services.AddTransient<IMailIntelligenceGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
-        services.AddTransient<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>(serviceProvider =>
-            serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
         services.AddTransient<IMailDraftGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OllamaMailIntelligenceGateway>());
+        services
+            .AddHttpClient<OllamaMailboxPreviewClassifier>(client =>
+                client.Timeout = Timeout.InfiniteTimeSpan);
+        services.AddTransient<IMailboxPreviewClassifier>(serviceProvider =>
+            serviceProvider.GetRequiredService<OllamaMailboxPreviewClassifier>());
 
         services
             .AddHealthChecks()

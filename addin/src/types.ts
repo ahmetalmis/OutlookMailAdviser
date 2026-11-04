@@ -53,9 +53,26 @@ export interface AnalyzeMailResponse {
   wasTruncated: boolean;
 }
 
-export type DraftTone = "professional" | "friendly" | "concise" | "persuasive" | "empathetic";
+export type DraftTone =
+  | "professional"
+  | "friendly"
+  | "concise"
+  | "persuasive"
+  | "empathetic"
+  | "grateful"
+  | "apologetic"
+  | "firm";
 
-export type DraftMode = "reply" | "forward";
+export const draftToneOptions: { value: DraftTone; label: string }[] = [
+  { value: "professional", label: "Profesyonel" },
+  { value: "friendly", label: "Samimi" },
+  { value: "concise", label: "Kısa ve net" },
+  { value: "persuasive", label: "İkna edici" },
+  { value: "empathetic", label: "Empatik" },
+  { value: "grateful", label: "Teşekkür eden" },
+  { value: "apologetic", label: "Özür dileyen" },
+  { value: "firm", label: "Kararlı" },
+];
 
 export interface DraftMailRequest {
   clientRequestId: string;
@@ -64,10 +81,6 @@ export interface DraftMailRequest {
   tone: DraftTone;
   toneDetails?: string;
   instructions: string;
-  sourceQuotes?: string[];
-  draftMode?: DraftMode;
-  targetAudience?: string;
-  considerations?: string;
 }
 
 export interface DraftMailResponse {
@@ -83,24 +96,48 @@ export interface DraftMailResponse {
 
 export interface ApiStatus {
   state: "healthy" | "unhealthy";
-  code?: string;
   provider?: string;
   model?: string;
   detail?: string;
 }
 
-export interface QuestionSource {
-  id: string;
-  quote: string;
-  startOffset: number;
+export interface MailboxTriageMessage {
+  itemId: string;
+  conversationId: string | null;
+  subject: string;
+  from: MailParticipant;
+  to: MailParticipant[];
+  cc: MailParticipant[];
+  receivedAt: string | null;
+  preview: string;
+  hasUnsubscribeHint: boolean;
+  isAutoSubmitted: boolean;
 }
 
-export interface MailQuestionResponse {
-  errorCode?: string | null;
-  answer: string;
-  sources: QuestionSource[];
-  completedChunks: number;
-  totalChunks: number;
-  isPartial: boolean;
-  warnings: string[];
+export interface MailboxTriageRequest {
+  clientRequestId: string;
+  preferredLanguage: string;
+  currentUser?: MailParticipant;
+  messages: MailboxTriageMessage[];
+}
+
+export interface MailboxTriageItem {
+  itemId: string;
+  subject: string;
+  fromName: string | null;
+  fromAddress: string;
+  receivedAt: string | null;
+  reason: string;
+  priority: string;
+}
+
+export interface MailboxTriageResponse {
+  clientRequestId: string;
+  scannedCount: number;
+  headerFilteredCount: number;
+  classifiedCount: number;
+  model: string;
+  durationMilliseconds: number;
+  actionItems: MailboxTriageItem[];
+  reviewItems: MailboxTriageItem[];
 }

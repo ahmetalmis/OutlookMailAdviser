@@ -1,0 +1,12 @@
+@echo off
+rem Bu dosyayi "start-dev.local.cmd" olarak kopyalayin ve degerleri doldurun.
+rem start-dev.local.cmd Git'e eklenmez (anahtar guvenligi).
+
+rem --- OpenAI (onerilen) ---
+set "Ai__Provider=OpenAI"
+set "OPENAI_API_KEY=sk-proj-BURAYA_KENDI_ANAHTARINIZ"
+set "Ai__OpenAI__Model=gpt-4.1-mini"
+
+rem --- Alternatif: Ollama (yerel, ucretsiz) ---
+rem set "Ai__Provider=Ollama"
+rem set "Ai__Ollama__Model=qwen3.5:2b"

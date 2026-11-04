@@ -6,6 +6,7 @@ using OutlookMailAdviser.Adapters.OpenAI.Configuration;
 using OutlookMailAdviser.Adapters.OpenAI.Health;
 using OutlookMailAdviser.Application.MailAnalysis.Ports;
 using OutlookMailAdviser.Application.MailDrafting.Ports;
+using OutlookMailAdviser.Application.MailboxTriage.Ports;
 
 namespace OutlookMailAdviser.Adapters.OpenAI;
 
@@ -42,10 +43,13 @@ public static class DependencyInjection
                 client.Timeout = Timeout.InfiniteTimeSpan);
         services.AddTransient<IMailIntelligenceGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OpenAiMailIntelligenceGateway>());
-        services.AddTransient<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>(serviceProvider =>
-            serviceProvider.GetRequiredService<OpenAiMailIntelligenceGateway>());
         services.AddTransient<IMailDraftGateway>(serviceProvider =>
             serviceProvider.GetRequiredService<OpenAiMailIntelligenceGateway>());
+        services
+            .AddHttpClient<OpenAiMailboxPreviewClassifier>(client =>
+                client.Timeout = Timeout.InfiniteTimeSpan);
+        services.AddTransient<IMailboxPreviewClassifier>(serviceProvider =>
+            serviceProvider.GetRequiredService<OpenAiMailboxPreviewClassifier>());
 
         services
             .AddHealthChecks()

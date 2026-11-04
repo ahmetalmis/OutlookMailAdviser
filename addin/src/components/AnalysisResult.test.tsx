@@ -34,6 +34,28 @@ describe("AnalysisResult", () => {
     expect(html).toContain("Senden bekleniyor");
   });
 
+  it("shows the original mail beside the summary", () => {
+    const html = renderToStaticMarkup(
+      <AnalysisResult
+        result={createResult(false)}
+        message={{
+          itemId: "mail-1",
+          subject: "Toplantı",
+          from: { name: "Meryem", address: "meryem@innova.com.tr" },
+          to: [{ name: "Kamil", address: "ozozdemir@innova.com.tr" }],
+          cc: [],
+          sentAt: null,
+          body: "<p>Herkes müsaitse bugün öğleden sonra toplantı yapalım mı?</p>",
+          bodyFormat: "html",
+        }}
+      />,
+    );
+
+    expect(html).toContain("Ana mail");
+    expect(html).toContain("Herkes müsaitse bugün öğleden sonra toplantı yapalım mı?");
+    expect(html).toContain("Tarih teyidi isteniyor.");
+  });
+
   it("does not highlight actions assigned to someone else", () => {
     const html = renderToStaticMarkup(<AnalysisResult result={createResult(false)} />);
 

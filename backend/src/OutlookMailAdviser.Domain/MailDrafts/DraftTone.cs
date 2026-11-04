@@ -6,5 +6,8 @@ public enum DraftTone
     Friendly,
     Concise,
     Persuasive,
-    Empathetic
+    Empathetic,
+    Grateful,
+    Apologetic,
+    Firm
 }

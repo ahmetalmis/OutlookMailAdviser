@@ -15,6 +15,12 @@ certs/
 .env
 .env.*
 !.env.example
+start-dev.local.cmd
+tray/logs/
+tray/launch-tray.vbs
+tray/create-startup-shortcut.vbs
+tray/.tray.instance.lock
+tray/.launch.lock
 *.log
 logs/
 *.pfx

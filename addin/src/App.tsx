@@ -1,107 +1,71 @@
-import { LanguageProvider, useLanguage, readPreference, savePreference } from "./i18n/LanguageContext";
-import { errorText, UiError } from "./i18n/messages";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { analyzeMail, draftMail, getApiStatus } from "./api/mailAnalysisApi";
-import { MailQuestions } from "./components/MailQuestions";
+import { useCallback, useEffect, useState } from "react";
+import { analyzeMail, draftMail, getApiStatus, MailAnalysisApiError } from "./api/mailAnalysisApi";
 import { AnalysisResult } from "./components/AnalysisResult";
+import { PriorityInbox } from "./components/PriorityInbox";
 import { ContentProcessingNotice } from "./components/ContentProcessingNotice";
+import { loadMessageAnalysis, saveMessageAnalysis } from "./office/analysisCache";
 import {
   createAnalysisRequest,
   readCurrentMessage,
   registerItemChanged,
   type OutputLanguage,
 } from "./office/outlookItemReader";
-import type {
-  AnalyzeMailResponse,
-  ApiStatus,
-  DraftMailResponse,
-  DraftTone,
-  DraftMode,
-  MailMessage,
+import {
+  draftToneOptions,
+  type AnalyzeMailResponse,
+  type ApiStatus,
+  type DraftMailResponse,
+  type DraftTone,
+  type MailMessage,
 } from "./types";
 
 const OUTPUT_LANGUAGE_KEY = "mail-adviser.output-language";
 
-export default function App() {
-  return <LanguageProvider><MailAdviser /></LanguageProvider>;
+function initialView(): "message" | "priority" {
+  const view = new URLSearchParams(window.location.search).get("view");
+  return view === "priority" ? "priority" : "message";
 }
 
-function MailAdviser() {
-  const { language, setLanguage, t, number } = useLanguage();
-  const itemVersion = useRef(0);
-  const statusRequest = useRef<AbortController | null>(null);
-  const [draftOpened, setDraftOpened] = useState(false);
-  const [sourceQuotes, setSourceQuotes] = useState<string[]>([]);
-  const [sourceBody, setSourceBody] = useState<string | null>(null);
+export default function App() {
   const [message, setMessage] = useState<MailMessage | null>(null);
-  const [status, setStatus] = useState<ApiStatus>({ state: "unhealthy", code: "checking" });
-  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [status, setStatus] = useState<ApiStatus>({ state: "unhealthy", detail: "Kontrol ediliyor…" });
   const [result, setResult] = useState<AnalyzeMailResponse | null>(null);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [draftTone, setDraftTone] = useState<DraftTone>("professional");
-  const [draftToneDetails, setDraftToneDetails] = useState("");
-  const [draftMode, setDraftMode] = useState<DraftMode>("reply");
-  const [targetAudience, setTargetAudience] = useState("");
-  const [considerations, setConsiderations] = useState("");
   const [draftInstructions, setDraftInstructions] = useState("");
   const [draftResult, setDraftResult] = useState<DraftMailResponse | null>(null);
-  const [draftError, setDraftError] = useState<unknown>(null);
+  const [draftError, setDraftError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(() =>
-    readPreference(OUTPUT_LANGUAGE_KEY) === "en" ? "en" : "tr",
+    localStorage.getItem(OUTPUT_LANGUAGE_KEY) === "en" ? "en" : "tr",
   );
+  const [view, setView] = useState<"message" | "priority">(initialView);
 
   const loadItem = useCallback(async () => {
-    const version = ++itemVersion.current;
-    setMessage(null);
-    setDraftMode("reply");
-    setTargetAudience("");
-    setConsiderations("");
-    setDraftInstructions("");
-    setCopied(false);
-    setSourceQuotes([]);
-    setSourceBody(null);
-    setDraftOpened(false);
-    setDrafting(false);
-    setLoading(false);
-    setResult(null);
     setDraftResult(null);
     setDraftError(null);
     setError(null);
     try {
-      const current = await readCurrentMessage();
-      if (version === itemVersion.current) { setMessage(current); }
+      const next = await readCurrentMessage();
+      setMessage(next);
+      const cached = next.itemId ? loadMessageAnalysis(next.itemId, outputLanguage) : null;
+      setResult(cached?.result ?? null);
     } catch (readError) {
-      if (version !== itemVersion.current) return;
       setMessage(null);
-      setError(readError ?? new UiError("readFailed"));
+      setResult(null);
+      setError(readError instanceof Error ? readError.message : "E-posta okunamadı.");
     }
-  }, []);
-
-  const refreshStatus = useCallback(async () => {
-    statusRequest.current?.abort();
-    const controller = new AbortController();
-    statusRequest.current = controller;
-    setCheckingStatus(true);
-    try {
-      const current = await getApiStatus(controller.signal);
-      if (!controller.signal.aborted) setStatus(current);
-    } finally {
-      if (!controller.signal.aborted) setCheckingStatus(false);
-    }
-  }, []);
+  }, [outputLanguage]);
 
   useEffect(() => {
     void loadItem();
-    void refreshStatus();
+    void getApiStatus().then(setStatus);
     registerItemChanged(() => void loadItem());
-    return () => statusRequest.current?.abort();
-  }, [loadItem, refreshStatus]);
+  }, [loadItem]);
 
   async function handleAnalyze() {
-    const version = itemVersion.current;
     setLoading(true);
     setError(null);
     setResult(null);
@@ -109,89 +73,80 @@ function MailAdviser() {
     setDraftError(null);
     try {
       const request = await createAnalysisRequest(outputLanguage);
-      if (version !== itemVersion.current) return;
       setMessage(request.message);
-      setSourceQuotes([]);
-      setSourceBody(null);
+      const itemId = request.message.itemId;
+      const cached = itemId ? loadMessageAnalysis(itemId, outputLanguage) : null;
+      if (cached) {
+        setResult(cached.result);
+        return;
+      }
+
       const analysis = await analyzeMail(request);
-      if (version !== itemVersion.current) return;
+      if (itemId) {
+        saveMessageAnalysis(itemId, outputLanguage, analysis);
+      }
       setResult(analysis);
-      void refreshStatus();
+      setStatus(await getApiStatus());
     } catch (analysisError) {
-      if (version !== itemVersion.current) return;
-      setError(analysisError ?? new UiError("analysisFailed"));
+      if (analysisError instanceof MailAnalysisApiError) {
+        const code = analysisError.code ? ` (${analysisError.code})` : "";
+        setError(`${analysisError.message}${code}`);
+      } else {
+        setError(analysisError instanceof Error ? analysisError.message : "Analiz tamamlanamadı.");
+      }
     } finally {
-      if (version === itemVersion.current) setLoading(false);
+      setLoading(false);
     }
   }
 
   async function handleDraft() {
-    const version = itemVersion.current;
     const instructions = draftInstructions.trim();
     if (!instructions) {
-      setDraftError(new UiError("instructionsRequired"));
+      setDraftError("Hazırlanacak yanıtın kısa bir özetini veya talimatını yazın.");
       return;
     }
 
-    if (!["reply", "forward"].includes(draftMode)) {
-      setDraftError(new UiError("invalidDraftMode"));
-      return;
-    }
-    if (draftMode === "forward" && !targetAudience.trim()) {
-      setDraftError(new UiError("audienceRequired"));
-      return;
-    }
-    if (targetAudience.trim().length > 500 || considerations.trim().length > 2000) {
-      setDraftError(new UiError("draftLimits"));
-      return;
-    }
     setDrafting(true);
     setDraftError(null);
     setDraftResult(null);
     setCopied(false);
     try {
       const context = await createAnalysisRequest(outputLanguage);
-      if (version !== itemVersion.current) return;
-      if (sourceQuotes.length > 0 && context.message.body !== sourceBody) {
-        setSourceQuotes([]);
-        setSourceBody(null);
-        throw new UiError("staleSources");
-      }
       const draft = await draftMail({
         clientRequestId: context.clientRequestId,
         preferredLanguage: context.preferredLanguage,
         message: context.message,
         tone: draftTone,
-        draftMode,
-        targetAudience: draftMode === "forward" ? targetAudience.trim() : undefined,
-        considerations: considerations.trim() || undefined,
-        toneDetails: draftToneDetails.trim() || undefined,
         instructions,
-        sourceQuotes,
       });
-      if (version === itemVersion.current) setDraftResult(draft);
+      setDraftResult(draft);
     } catch (draftingError) {
-      if (version !== itemVersion.current) return;
-      setDraftError(draftingError ?? new UiError("draftFailed"));
+      if (draftingError instanceof MailAnalysisApiError) {
+        const code = draftingError.code ? ` (${draftingError.code})` : "";
+        setDraftError(`${draftingError.message}${code}`);
+      } else {
+        setDraftError(draftingError instanceof Error ? draftingError.message : "Taslak hazırlanamadı.");
+      }
     } finally {
-      if (version === itemVersion.current) setDrafting(false);
+      setDrafting(false);
     }
   }
 
   async function handleCopyDraft() {
     if (!draftResult) return;
     try {
-      await navigator.clipboard.writeText(draftResult.body);
+      await navigator.clipboard.writeText(`Konu: ${draftResult.subject}\n\n${draftResult.body}`);
       setCopied(true);
     } catch {
-      setDraftError(new UiError("copyFailed"));
+      setDraftError("Taslak panoya kopyalanamadı. Metni seçerek manuel kopyalayabilirsiniz.");
     }
   }
 
   function handleLanguageChange(language: OutputLanguage) {
     setOutputLanguage(language);
-    savePreference(OUTPUT_LANGUAGE_KEY, language);
-    setResult(null);
+    localStorage.setItem(OUTPUT_LANGUAGE_KEY, language);
+    const cached = message?.itemId ? loadMessageAnalysis(message.itemId, language) : null;
+    setResult(cached?.result ?? null);
   }
 
   return (
@@ -200,186 +155,138 @@ function MailAdviser() {
         <div className="logo">MA</div>
         <div>
           <h1>Mail Adviser</h1>
-          <p>{t("intro")}</p>
+          <p>{view === "priority" ? "Cevap bekleyen okunmamışlar." : "Açık e-postayı yapay zekâ ile analiz edin."}</p>
         </div>
       </header>
 
-      <div className={`status ${status.state}`} role="status" aria-live="polite">
-        <span className="status-dot" aria-hidden="true" />
-        <span className="status-message">
-          {status.state === "healthy"
-            ? `${t("apiReady")}${status.provider ? ` · ${status.provider}` : ""}${status.model ? ` / ${status.model}` : ""}`
-            : `${t("apiNotReady")} · ${errorText({ code: status.code }, t, "provider_not_ready")}`}
-        </span>
-        <button className="status-retry" type="button" onClick={() => void refreshStatus()} disabled={checkingStatus}>
-          {checkingStatus ? t("checking") : t("retry")}
+      <div className="view-switch" role="tablist">
+        <button type="button" role="tab" aria-selected={view === "priority"} onClick={() => setView("priority")}>
+          Öncelikli mailler
+        </button>
+        <button type="button" role="tab" aria-selected={view === "message"} onClick={() => setView("message")}>
+          Bu e-posta
         </button>
       </div>
 
-      {message && (
-        <section className="mail-card">
-          <span className="eyebrow">{t("currentEmail")}</span>
-          <h2>{message.subject || t("noSubject")}</h2>
-          <p>{message.from.name || message.from.address}</p>
-          {message.from.name && <small>{message.from.address}</small>}
-        </section>
-      )}
+      <div className={`status ${status.state}`}>
+        <span className="status-dot" aria-hidden="true" />
+        <span>
+          {status.state === "healthy"
+            ? `API hazır${status.provider ? ` · ${status.provider}` : ""}${status.model ? ` / ${status.model}` : ""}`
+            : `API hazır değil${status.detail ? ` · ${status.detail}` : ""}`}
+        </span>
+      </div>
 
       <label className="language-field">
-        <span>{t("uiLanguage")}</span>
-        <select value={language} onChange={event => setLanguage(event.target.value as OutputLanguage)}>
-          <option value="tr">Türkçe</option>
-          <option value="en">English</option>
-        </select>
-      </label>
-
-      <label className="language-field">
-        <span>{t("outputLanguage")}</span>
+        <span>Sonuç dili</span>
         <select
           value={outputLanguage}
           onChange={(event) => handleLanguageChange(event.target.value as OutputLanguage)}
-          disabled={loading || drafting}
+          disabled={loading}
         >
           <option value="tr">Türkçe</option>
           <option value="en">English</option>
         </select>
       </label>
 
+      {view === "priority" && <PriorityInbox outputLanguage={outputLanguage} />}
+
+      {view === "message" && (
+      <>
+      {message && (
+        <section className="mail-card">
+          <span className="eyebrow">Açık e-posta</span>
+          <h2>{message.subject}</h2>
+          <span className="read-flag read">Okundu</span>
+          <p>{message.from.name || message.from.address}</p>
+          {message.from.name && <small>{message.from.address}</small>}
+        </section>
+      )}
+
       <button
         className="analyze-button"
         type="button"
         onClick={handleAnalyze}
-        disabled={!message || loading || drafting}
+        disabled={!message || loading || result !== null}
       >
-        {loading ? t("analyzing") : t("analyze")}
+        {loading ? "Analiz ediliyor…" : result ? "Analiz edildi" : "Analiz et"}
       </button>
 
-      {loading && <div className="progress" role="progressbar" aria-label={t("analyzing")}><span /></div>}
-      {error != null && <div className="error" role="alert">{errorText(error, t)}</div>}
-      {result && <AnalysisResult result={result} />}
+      {loading && <div className="progress" role="progressbar"><span /></div>}
+      {error && <div className="error" role="alert">{error}</div>}
+      {result && <AnalysisResult result={result} message={message} />}
 
-      {message && <MailQuestions message={message} language={outputLanguage} useSourcesDisabled={drafting || loading} onUseSources={quotes => {
-        setDraftOpened(true);
-        setSourceQuotes(quotes);
-        setSourceBody(message.body);
-        setDraftResult(null);
-        if (!draftInstructions.trim()) setDraftInstructions(t("defaultInstructions"));
-      }} />}
-
-      {(result || draftOpened) && (
+      {result && (
         <section className="draft-composer">
           <div>
-            <span className="eyebrow">{t("draftEyebrow")}</span>
-            <h2>{t("compose")}</h2>
-            <p>{t("composeHelp")}</p>
+            <span className="eyebrow">Yanıt taslağı</span>
+            <h2>Mail hazırla</h2>
+            <p>Bu e-postaya verilecek yanıtın tonunu ve ana fikrini belirtin.</p>
           </div>
 
-          {sourceQuotes.length > 0 && <div className="selected-sources" role="status">
-            <p>{t("selectedSources", { count: number(sourceQuotes.length) })}</p>
-            <details><summary>{t("showQuotes")}</summary>
-              {sourceQuotes.map((quote, index) => <blockquote key={index}>{quote}</blockquote>)}
-            </details>
-            <button type="button" disabled={drafting} onClick={() => { setSourceQuotes([]); setSourceBody(null); }}>{t("removeQuotes")}</button>
-          </div>}
           <label className="draft-field">
-            <span>{t("draftMode")}</span>
-            <select value={draftMode} disabled={drafting} onChange={event => {
-              setDraftMode(event.target.value as DraftMode);
-              setDraftResult(null);
-              setDraftError(null);
-              setCopied(false);
-            }}>
-              <option value="reply">{t("reply")}</option>
-              <option value="forward">{t("forward")}</option>
-            </select>
-          </label>
-          {draftMode === "forward" && <label className="draft-field">
-            <span>{t("audience")}</span>
-            <textarea value={targetAudience} onChange={event => setTargetAudience(event.target.value)}
-              required maxLength={500} rows={2} disabled={drafting}
-              placeholder={t("audienceExample")} />
-            <small>{number(targetAudience.length)}/{number(500)}</small>
-          </label>}
-          <label className="draft-field">
-            <span>{t("tone")}</span>
+            <span>Ton</span>
             <select
               value={draftTone}
               onChange={(event) => setDraftTone(event.target.value as DraftTone)}
               disabled={drafting}
             >
-              <option value="professional">{t("professional")}</option>
-              <option value="friendly">{t("friendly")}</option>
-              <option value="concise">{t("concise")}</option>
-              <option value="persuasive">{t("persuasive")}</option>
-              <option value="empathetic">{t("empathetic")}</option>
+              {draftToneOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </label>
 
           <label className="draft-field">
-            <span>{t("toneDetails")} <em>{t("optional")}</em></span>
-            <input
-              type="text"
-              value={draftToneDetails}
-              onChange={(event) => setDraftToneDetails(event.target.value)}
-              maxLength={500}
-              disabled={drafting}
-              placeholder={t("toneExample")}
-            />
-            <small>{number(draftToneDetails.length)}/{number(500)}</small>
-          </label>
-
-          <label className="draft-field">
-            <span>{t("instructions")}</span>
+            <span>Açıklama / yanıt özeti</span>
             <textarea
               value={draftInstructions}
               onChange={(event) => setDraftInstructions(event.target.value)}
               maxLength={2000}
               rows={5}
               disabled={drafting}
-              placeholder={t("instructionsExample")}
+              placeholder="Örn. Kurulumun tamamlandığını belirt, test için yarın 14:00'ü öner ve teşekkür et."
             />
-            <small>{number(draftInstructions.length)}/{number(2000)}</small>
-          </label>
-
-          <label className="draft-field">
-            <span>{t("considerations")} <em>{t("optional")}</em></span>
-            <textarea value={considerations} onChange={event => setConsiderations(event.target.value)}
-              maxLength={2000} rows={3} disabled={drafting}
-              placeholder={t("considerationsExample")} />
-            <small>{number(considerations.length)}/{number(2000)}</small>
+            <small>{draftInstructions.length}/2000</small>
           </label>
 
           <button
             className="draft-button"
             type="button"
             onClick={handleDraft}
-            disabled={drafting || loading || !draftInstructions.trim() || (draftMode === "forward" && !targetAudience.trim())}
+            disabled={drafting || !draftInstructions.trim()}
           >
-            {drafting ? t("drafting") : t("createDraft")}
+            {drafting ? "Taslak hazırlanıyor…" : "Yanıt taslağı oluştur"}
           </button>
 
-          {drafting && <div className="progress" role="progressbar" aria-label={t("drafting")}><span /></div>}
-          {draftError != null && <div className="error" role="alert">{errorText(draftError, t)}</div>}
+          {drafting && <div className="progress" role="progressbar"><span /></div>}
+          {draftError && <div className="error" role="alert">{draftError}</div>}
 
           {draftResult && (
             <div className="draft-result" aria-live="polite">
               <div className="draft-result-heading">
-                <h3>{t("preparedDraft")}</h3>
-                <button type="button" onClick={handleCopyDraft}>{copied ? t("copied") : t("copy")}</button>
+                <h3>Hazırlanan taslak</h3>
+                <button type="button" onClick={handleCopyDraft}>{copied ? "Kopyalandı" : "Kopyala"}</button>
               </div>
-              <span className="draft-subject-label">{t("subject")}</span>
+              <span className="draft-subject-label">Konu</span>
               <strong className="draft-subject">{draftResult.subject}</strong>
               <div className="draft-body">{draftResult.body}</div>
               <ContentProcessingNotice processing={draftResult.contentProcessing} wasTruncated={draftResult.wasTruncated} />
               <p className="metadata">
-                {draftResult.model} · {number(draftResult.durationMilliseconds / 1000, 1)} {t("seconds")}
+                {draftResult.model} · {(draftResult.durationMilliseconds / 1000).toFixed(1)} sn
               </p>
             </div>
           )}
         </section>
       )}
+      </>
+      )}
 
-      <footer>{t("privacy")}</footer>
+      <footer>
+        {view === "priority"
+          ? "Önce başlıklar elenir. Yalnızca kısa listedeki gövdeler yapılandırdığınız yapay zekâ sağlayıcısına gider. E-posta gönderilmez."
+          : "E-posta içeriği yalnızca yapılandırdığınız API ve AI sağlayıcısına gönderilir."}
+      </footer>
     </main>
   );
 }

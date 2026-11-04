@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using OutlookMailAdviser.Application.MailAnalysis.Ports;
 using OutlookMailAdviser.Application.MailDrafting.Ports;
+using OutlookMailAdviser.Application.MailboxTriage.Ports;
 
 namespace OutlookMailAdviser.Api.IntegrationTests;
 
@@ -13,9 +14,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     public StubMailIntelligenceGateway IntelligenceGateway { get; } = new();
 
-    public StubMailQuestionGateway QuestionGateway { get; } = new();
-
     public StubMailDraftGateway DraftGateway { get; } = new();
+
+    public StubMailboxPreviewClassifier PreviewClassifier { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -30,10 +31,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll<IMailIntelligenceGateway>();
             services.AddSingleton<IMailIntelligenceGateway>(IntelligenceGateway);
-            services.RemoveAll<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>();
-            services.AddSingleton<OutlookMailAdviser.Application.MailQuestions.IMailQuestionGateway>(QuestionGateway);
             services.RemoveAll<IMailDraftGateway>();
             services.AddSingleton<IMailDraftGateway>(DraftGateway);
+            services.RemoveAll<IMailboxPreviewClassifier>();
+            services.AddSingleton<IMailboxPreviewClassifier>(PreviewClassifier);
         });
     }
 }

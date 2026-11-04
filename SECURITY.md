@@ -42,6 +42,6 @@ database. Normal API logs must not contain message bodies, prompts, model output
 or credentials. Local host scripts write operational logs to their local logs folder.
 Browser state retains the output-language preference, not a mailbox archive.
 
-The add-in requests `ReadItem`; it does not automatically send email. Review
+The add-in requests `ReadItem`; it does not automatically send email. Unread inbox listing is read locally through the installed Outlook profile. Review
 every AI-generated action/date and draft before using it. Prompt instructions
 reduce but cannot eliminate incorrect output or prompt-injection risk.

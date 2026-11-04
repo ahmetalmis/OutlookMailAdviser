@@ -22,4 +22,12 @@ export default defineConfig(async ({ command }) => ({
     port: 3000,
     strictPort: true,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve("index.html"),
+        auth: resolve("auth.html"),
+      },
+    },
+  },
 }));

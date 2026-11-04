@@ -8,8 +8,4 @@ public sealed record DraftMailCommand(
     DraftTone Tone,
     string Instructions,
     string PreferredLanguage,
-    string? ToneDetails = null,
-    IReadOnlyList<string>? SourceQuotes = null,
-    DraftMode DraftMode = DraftMode.Reply,
-    string? TargetAudience = null,
-    string? Considerations = null);
+    string? ToneDetails = null);

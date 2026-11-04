@@ -18,9 +18,11 @@ internal sealed partial class ApiExceptionHandler(
         {
             LogRequestFailed(
                 logger,
+                exception,
                 httpContext.TraceIdentifier,
                 exception.GetType().Name,
-                error.Code);
+                error.Code,
+                exception.Message);
         }
         else
         {
@@ -54,6 +56,11 @@ internal sealed partial class ApiExceptionHandler(
             "invalid_request",
             "The request is invalid.",
             exception.Message),
+        OutlookMailboxException mailboxException => new ApiError(
+            StatusCodes.Status503ServiceUnavailable,
+            "outlook_unavailable",
+            "Outlook is unavailable.",
+            mailboxException.Message),
         OllamaUnavailableException => new ApiError(
             StatusCodes.Status503ServiceUnavailable,
             "ollama_unavailable",
@@ -78,7 +85,7 @@ internal sealed partial class ApiExceptionHandler(
             StatusCodes.Status502BadGateway,
             providerException.Code,
             "The model provider returned an error.",
-            ProviderErrorDetails.GetDetail(providerException.Code)),
+            ProviderDetail(providerException.Code)),
         _ => new ApiError(
             StatusCodes.Status500InternalServerError,
             "internal_error",
@@ -86,15 +93,25 @@ internal sealed partial class ApiExceptionHandler(
             "The request could not be completed.")
     };
 
+    private static string ProviderDetail(string code) => code switch
+    {
+        "openai_authentication_failed" => "OpenAI rejected the configured API key.",
+        "openai_rate_limited" => "OpenAI rate limit or quota was exceeded.",
+        "openai_unavailable" => "OpenAI is unreachable. Check the connection and provider configuration.",
+        _ => "The model provider could not complete the request. Check the provider configuration."
+    };
+
     [LoggerMessage(
         EventId = 1001,
         Level = LogLevel.Error,
-        Message = "Request {TraceId} failed with {ExceptionType} and code {ErrorCode}.")]
+        Message = "Request {TraceId} failed with {ExceptionType} and code {ErrorCode}: {ExceptionMessage}.")]
     private static partial void LogRequestFailed(
         ILogger logger,
+        Exception exception,
         string traceId,
         string exceptionType,
-        string errorCode);
+        string errorCode,
+        string exceptionMessage);
 
     [LoggerMessage(
         EventId = 1002,

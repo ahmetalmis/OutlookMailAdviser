@@ -73,26 +73,3 @@ For a manual chain test, append three blocks to the HTML body, each containing
 `From:`, `Sent:`, `To:`, `Subject:` on separate lines followed by unique
 message text. Expect two included history messages, `historyLimited=true`,
 and `currentMessageTruncated=false` for a short current message.
-
-## 1.0.0: Questions about the current correspondence
-
-**Mail Questions / Ask Current Correspondence** examines the entire supplied body, including quoted
-history. A 200 response can be partial: inspect `isPartial`, `completedChunks`, `totalChunks`, and
-`warnings` before interpreting absence of evidence. **Draft With Source Quotes** demonstrates the
-optional `sourceQuotes` array; changing a quote to text absent from the body returns 400.
-
-### Audience-specific drafts
-
-Add the following optional fields to the existing `POST /api/v1/mail/draft` request:
-
-```json
-{
-  "draftMode": "forward",
-  "targetAudience": "My department head and operations manager",
-  "considerations": "Avoid personal blame and date commitments."
-}
-```
-
-If `draftMode` is omitted, `reply` is used. `forward` requires `targetAudience` (up to 500 characters); `considerations` is optional (up to 2,000 characters). Send these fields with the existing `message`, `tone` and `instructions` fields. The response schema is unchanged; no email is automatically forwarded or sent.
-
-The environment language variable sets `preferredLanguage` for model output (`tr` or `en`). The Outlook panel's interface language is a separate local preference and does not change the HTTP API contract.

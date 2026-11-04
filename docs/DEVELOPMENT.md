@@ -205,7 +205,7 @@ Varsayılan OpenAI modeli `gpt-4.1-mini`'dir. Model ve üretim seçenekleri ayn�
 
 ```powershell
 $env:Ai__OpenAI__Model = 'gpt-4.1-mini'
-$env:Ai__OpenAI__MaxOutputTokens = '2048'
+$env:Ai__OpenAI__MaxOutputTokens = '512'
 $env:Ai__OpenAI__TimeoutSeconds = '60'
 ```
 
@@ -223,7 +223,7 @@ Remove-Item Env:Ai__OpenAI__TimeoutSeconds -ErrorAction SilentlyContinue
 
 Outlook task pane uygulaması `addin/` klasöründedir. Açık e-postanın konu, gönderen, alıcı, tarih ve HTML gövdesini Office.js ile okuyup `POST /api/v1/mail/analysis` endpoint'ine gönderir. Analiz isteğindeki opsiyonel `currentUser` alanı Outlook kullanıcısının ad/e-posta bilgisini taşır. Yanıttaki `actionRequiredFromCurrentUser` ve aksiyon seviyesindeki `assignedToCurrentUser` alanları, kullanıcıdan beklenen aksiyonların ayrıca vurgulanmasını sağlar. Analiz sonrasında ton ve kullanıcı açıklamasını alan `POST /api/v1/mail/draft` endpoint'i seçili Ollama veya OpenAI modeliyle konu ve yanıt gövdesi üretir.
 
-Desteklenen tonlar: `professional`, `friendly`, `concise`, `persuasive` ve `empathetic`. Taslak isteğindeki opsiyonel `toneDetails` alanı ana tona ek olarak “hafif sert ve uyarıcı” gibi en fazla 500 karakterlik üslup yönlendirmesi taşır. Add-in yalnızca `ReadItem` iznine sahiptir; oluşturulan taslak kullanıcıya gösterilir ve panoya kopyalanabilir, ancak Outlook mesajı otomatik değiştirilmez veya gönderilmez.
+Desteklenen tonlar: `professional`, `friendly`, `concise`, `persuasive` ve `empathetic`. Taslak isteğindeki opsiyonel `toneDetails` alanı ana tona ek olarak “hafif sert ve uyarıcı” gibi en fazla 500 karakterlik üslup yönlendirmesi taşır. Add-in `ReadItem` iznine sahiptir. Gelen kutusu listesi Microsoft Graph `Mail.Read` oturumu kullanır. Oluşturulan taslak kullanıcıya gösterilir ve panoya kopyalanabilir, ancak Outlook mesajı otomatik değiştirilmez veya gönderilmez.
 
 İlk kurulum ve Outlook'a manifest yükleme adımları için [addin/README.md](../addin/README.md) dosyasını izleyin. Kısa akış:
 
@@ -234,11 +234,9 @@ npm run certs
 npm run dev
 ```
 
-Ardından `addin/manifest.dev.xml` dosyasını Outlook'ta özel eklenti olarak yükleyin. API'nin ayrı terminalde `https://localhost:7047` adresinde çalışıyor olması gerekir.
+Ardından `addin/manifest.xml` dosyasını Outlook'ta özel eklenti olarak yükleyin. API'nin ayrı terminalde `https://localhost:7047` adresinde çalışıyor olması gerekir.
 
 ## Windows'ta sürekli çalıştırma
-
-Windows açılışında oturumdan bağımsız çalışan kurulum için [Windows hizmeti rehberini](windows-service.md) kullanın. Aşağıdaki zamanlanmış görev yöntemi eski, oturum açılışına bağlı alternatiftir; Windows hizmetiyle birlikte etkinleştirmeyin.
 
 Kalıcı yerel kurulumda Vite geliştirme sunucusu kullanılmaz. React uygulaması
 production build olarak hazırlanır, .NET API'nin `wwwroot/addin` klasöründen
